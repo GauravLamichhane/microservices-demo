@@ -1,0 +1,36 @@
+services:
+  backend:
+    build: .
+    command: python main.py
+    env_file:
+      - .env
+    environment:
+      - FLASK_APP=main.py
+    depends_on:
+      - db
+    ports:
+      - "8001:5000"
+    volumes:
+      - .:/app
+
+  queue:
+    build: .
+    command: "python consumer.py"
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - flask_postgres_data:/var/lib/postgresql/data/
+
+volumes:
+  flask_postgres_data:
