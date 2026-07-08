@@ -6,7 +6,7 @@ A simple microservices architecture built with **Django REST Framework**, **Flas
 
 ## Architecture
 
-![System Architecture](docs/architecture.png)
+![System Architecture](docs/Architecture.png)
 
 ---
 
