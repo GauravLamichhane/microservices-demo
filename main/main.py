@@ -52,10 +52,14 @@ class ProductUser(db.Model):
 def index():
     products = Product.query.all()
     return jsonify([
-        {"id": p.id, "title": p.title, "image": p.image}
+        {
+            "id": p.id,
+            "title": p.title,
+            "image": p.image,
+            "likes": ProductUser.query.filter_by(product_id=p.id).count()
+        }
         for p in products
     ])
-
 @app.route("/api/products/<int:id>/like", methods = ['POST'])
 def like(id):
     req = requests.get('http://host.docker.internal:8000/api/user')

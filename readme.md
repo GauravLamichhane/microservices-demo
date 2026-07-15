@@ -257,11 +257,9 @@ Benefits:
 - JWT-based authorization
 - Service discovery
 - Distributed logging
-- Monitoring with Prometheus and Grafana
-- Kubernetes deployment
 - CI/CD pipeline
-- Automated testing
-- Retry and dead-letter queues for RabbitMQ
+- Elastic Search
+- Redis Caching
 
 ---
 

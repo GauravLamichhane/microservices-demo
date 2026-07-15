@@ -6,7 +6,7 @@ class Product(models.Model):
   likes = models.PositiveBigIntegerField(default=0)
 
   def __str__(self):
-    return self.name
+    return self.title
 
 class User(models.Model):
   pass

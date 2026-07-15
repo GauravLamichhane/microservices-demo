@@ -1,18 +1,16 @@
-import pika
 import json
 import os
+from kafka import KafkaProducer
+
+producer = KafkaProducer(
+    bootstrap_servers=os.environ.get("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092"),
+    value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+)
 
 def publish(method, body):
-    params = pika.URLParameters(os.environ.get("CLOUDAMQP_URL"))
-    connection = pika.BlockingConnection(params)
-    channel = connection.channel()
-    channel.queue_declare(queue='like_events')
-
-    properties = pika.BasicProperties(type=method)
-    channel.basic_publish(
-        exchange='',
-        routing_key='like_events',
-        body=json.dumps(body),
-        properties=properties
+    producer.send(
+        "product-likes",
+        value=body,
+        headers=[("type", method.encode("utf-8"))]
     )
-    connection.close()
+    producer.flush()

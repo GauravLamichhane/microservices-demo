@@ -1,18 +1,21 @@
-import pika
 import json
 import os
+from kafka import KafkaProducer
+
+producer = KafkaProducer(
+    bootstrap_servers=os.environ.get("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092"),
+    value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+)
 
 def publish(method, body):
-    params = pika.URLParameters(os.environ.get("CLOUDAMQP_URL"))
-    connection = pika.BlockingConnection(params)
-    channel = connection.channel()
-    channel.queue_declare(queue='product_events')
-
-    properties = pika.BasicProperties(type=method)
-    channel.basic_publish(
-        exchange='',
-        routing_key='product_events',
-        body=json.dumps(body),
-        properties=properties
+    future = producer.send(
+        "product-events",
+        value=body,
+        headers=[("type", method.encode("utf-8"))]
     )
-    connection.close()
+    try:
+        record_metadata = future.get(timeout=10)
+        print(f"Published to {record_metadata.topic}, partition {record_metadata.partition}, offset {record_metadata.offset}")
+    except Exception as e:
+        print(f"Kafka publish failed: {e}")
+    producer.flush()

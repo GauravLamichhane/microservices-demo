@@ -12,6 +12,9 @@ services:
       - "8001:5000"
     volumes:
       - .:/app
+    networks:
+      - microservices-net
+      - default
 
   queue:
     build: .
@@ -20,6 +23,9 @@ services:
       - .env
     depends_on:
       - db
+    networks:
+      - microservices-net
+      - default
 
   db:
     image: postgres:17
@@ -34,3 +40,7 @@ services:
 
 volumes:
   flask_postgres_data:
+
+networks:
+  microservices-net:
+    external: true

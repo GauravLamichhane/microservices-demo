@@ -1,42 +1,62 @@
-# consumer.py
-import pika, json
+import json
+import time
 import os
-from main import Product, db
-
-params = pika.URLParameters(os.environ.get("CLOUDAMQP_URL"))
-connection = pika.BlockingConnection(params)
-channel = connection.channel()
-
-channel.queue_declare(queue='product_events')
-
+from kafka import KafkaConsumer
+from kafka.errors import NoBrokersAvailable
 from main import app, Product, db
 
-def callback(ch, method, properties, body):
+consumer = None
+for attempt in range(10):
+    try:
+        consumer = KafkaConsumer(
+            "product-events",
+            bootstrap_servers=os.environ.get("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092"),
+            group_id="admin-product-consumer",
+            enable_auto_commit=False,
+            auto_offset_reset="earliest",
+            value_deserializer=lambda v: json.loads(v.decode("utf-8")),
+        )
+        break
+    except NoBrokersAvailable:
+        print(f"Kafka not ready, retrying ({attempt+1}/10)...")
+        time.sleep(3)
+
+print("Started consuming")
+for message in consumer:
+    headers = dict(message.headers or [])
+    event_type = headers.get("type", b"").decode("utf-8")
+    data = message.value
     print("Received in admin")
-    data = json.loads(body)
     print(data)
 
     with app.app_context():
-        if properties.type == 'product_created':
-            product = Product(id=data['id'], title=data['title'], image=data['image'])
-            db.session.add(product)
-            db.session.commit()
-            print("Product Created")
+        if event_type == "product_created":
+            existing = Product.query.get(data["id"])
+            if existing:
+                print(f"Product {data['id']} already exists, skipping create")
+            else:
+                product = Product(id=data["id"], title=data["title"], image=data["image"])
+                db.session.add(product)
+                db.session.commit()
+                print("Product Created")
 
-        elif properties.type == 'product_updated':
-            product = Product.query.get(data['id'])
-            product.title = data['title']
-            product.image = data['image']
-            db.session.commit()
-            print("Product Updated")
+        elif event_type == "product_updated":
+            product = Product.query.get(data["id"])
+            if product:
+                product.title = data["title"]
+                product.image = data["image"]
+                db.session.commit()
+                print("Product Updated")
+            else:
+                print(f"Product {data['id']} not found in Flask DB, skipping update")
 
-        elif properties.type == 'product_deleted':
+        elif event_type == "product_deleted":
             product = Product.query.get(data)
-            db.session.delete(product)
-            db.session.commit()
-            print("Product deleted")
-            
-channel.basic_consume(queue='product_events', on_message_callback=callback, auto_ack=True)
+            if product:
+                db.session.delete(product)
+                db.session.commit()
+                print("Product deleted")
+            else:
+                print(f"Product {data} not found in Flask DB, skipping delete")
 
-print('Started consuming')
-channel.start_consuming()
+    consumer.commit()
