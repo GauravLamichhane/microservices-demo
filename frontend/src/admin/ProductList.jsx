@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { deleteProduct, getProducts, updateProduct } from "../api/client";
+import { deleteProduct, getAdminProducts, updateProduct } from "../api/client";
 import { useNavigate } from "react-router-dom";
 export default function ProductList() {
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
 
   async function loadProducts() {
-    const data = await getProducts();
+    const data = await getAdminProducts();
     console.log(data);
     setProducts(data);
   }

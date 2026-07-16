@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import ProductCard from "./ProductCard";
-import { getProducts, likeProduct } from "../api/client";
+import { getMainProducts, likeProduct } from "../api/client";
 export default function ProductList() {
   const [products, setProducts] = useState([]);
   const [likeError, setLikeError] = useState({});
 
   async function loadProducts() {
-    const data = await getProducts();
+    const data = await getMainProducts();
     setProducts(data);
   }
 

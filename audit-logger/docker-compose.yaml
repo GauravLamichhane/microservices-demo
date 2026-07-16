@@ -1,0 +1,13 @@
+services:
+  audit-logger:
+    build: .
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    networks:
+      - microservices-net
+
+networks:
+  microservices-net:
+    external: true

@@ -4,6 +4,9 @@ import os
 from kafka import KafkaConsumer
 from kafka.errors import NoBrokersAvailable
 from main import app, Product, db
+import redis
+
+cache = redis.Redis(host='redis', port=6379, decode_responses=True)
 
 consumer = None
 for attempt in range(10):
@@ -38,6 +41,7 @@ for message in consumer:
                 product = Product(id=data["id"], title=data["title"], image=data["image"])
                 db.session.add(product)
                 db.session.commit()
+                cache.delete("products")
                 print("Product Created")
 
         elif event_type == "product_updated":
@@ -46,6 +50,7 @@ for message in consumer:
                 product.title = data["title"]
                 product.image = data["image"]
                 db.session.commit()
+                cache.delete("products")
                 print("Product Updated")
             else:
                 print(f"Product {data['id']} not found in Flask DB, skipping update")
@@ -55,6 +60,7 @@ for message in consumer:
             if product:
                 db.session.delete(product)
                 db.session.commit()
+                cache.delete("products")
                 print("Product deleted")
             else:
                 print(f"Product {data} not found in Flask DB, skipping delete")

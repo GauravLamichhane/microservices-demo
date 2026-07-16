@@ -8,8 +8,13 @@ export const api = axios.create({ baseURL });
 const flaskBaseURL = "http://localhost:8001";
 const flaskApi = axios.create({ baseURL: flaskBaseURL });
 
-export async function getProducts() {
-  const { data } = await flaskApi.get("/api/products");
+export async function getAdminProducts() {
+  const { data } = await api.get("/api/products/");
+  return data;
+}
+
+export async function getMainProducts() {
+  const { data } = await flaskApi.get("/api/products"); // Flask
   return data;
 }
 
