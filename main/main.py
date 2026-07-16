@@ -1,11 +1,13 @@
+import os
+import requests
+import redis
+import json as json_lib
 from flask import Flask, jsonify, abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from sqlalchemy import UniqueConstraint
 from dotenv import load_dotenv
-import os
 from flask_migrate import Migrate
-import requests
 from producer import publish
 
 load_dotenv()
@@ -47,11 +49,15 @@ class ProductUser(db.Model):
         ),
     )
 
+cache = redis.Redis(host='redis', port=6379, decode_responses=True)
 
 @app.route("/api/products")
 def index():
+    cached = cache.get("products")
+    if cached:
+        return jsonify(json_lib.loads(cached))
     products = Product.query.all()
-    return jsonify([
+    result = [
         {
             "id": p.id,
             "title": p.title,
@@ -59,7 +65,12 @@ def index():
             "likes": ProductUser.query.filter_by(product_id=p.id).count()
         }
         for p in products
-    ])
+    ]
+
+    cache.setex("products", 30, json_lib.dumps(result))
+    return jsonify(result)
+
+
 @app.route("/api/products/<int:id>/like", methods = ['POST'])
 def like(id):
     req = requests.get('http://host.docker.internal:8000/api/user')
@@ -73,6 +84,7 @@ def like(id):
         db.session.commit()
 
         publish('product_liked', id)
+        cache.delete("products") # invalidate cache since like changed
     except:
         db.session.rollback()
         abort(400, "You already liked this product")
