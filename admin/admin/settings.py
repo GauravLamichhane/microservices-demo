@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "corsheaders",
     "products",
-    "rest_framework"
+    "rest_framework",
+    "django_celery_beat"
 ]
 
 MIDDLEWARE = [
@@ -129,3 +130,15 @@ CORS_ALLOW_ALL_ORIGINS = True
 ALLOWED_HOSTS = [
   "*"
 ]
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://redis:6379/0")
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_BROKER_URL", "redis://redis:6379/0")
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'reconcile-products-every-10-minutes': {
+        'task': 'products.tasks.reconcile_products',
+        'schedule': crontab(minute='*/10'),
+    },
+}
