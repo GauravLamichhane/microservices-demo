@@ -16,7 +16,7 @@ export default function ProductCard({ product, handleLike, errorMessage }) {
         >
           Like
         </button>
-        <span className="font-medium">Likes: {product.likes}</span>
+        <span className="font-medium">Likes: {product.likes ?? 0}</span>
       </div>
       {errorMessage && (
         <p className="mt-2 text-sm text-red-500">{errorMessage}</p>

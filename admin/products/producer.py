@@ -14,6 +14,7 @@ def publish(method, body):
         headers=[("type", method.encode("utf-8"))]
     )
     try:
+        #wait up to 10 sec if succ kafka returns metadata like record_metadata.topic, .partition, .offset
         record_metadata = future.get(timeout=10)
         print(f"Published to {record_metadata.topic}, partition {record_metadata.partition}, offset {record_metadata.offset}")
     except Exception as e:

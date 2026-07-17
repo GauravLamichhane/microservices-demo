@@ -45,6 +45,30 @@ services:
     networks:
       - default
 
+  celery-worker:
+    build: .
+    command: celery -A admin worker --loglevel=info
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+    networks:
+      - microservices-net
+      - default
+
+  celery-beat:
+    build: .
+    command: celery -A admin beat --loglevel=info
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+    networks:
+      - microservices-net
+      - default
+
 volumes:
   admin_postgres_data:
 
