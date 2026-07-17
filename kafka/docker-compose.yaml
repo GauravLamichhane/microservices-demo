@@ -37,11 +37,11 @@ services:
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
-    mem_limit: 400m
+    mem_limit: 500m
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+      - "ES_JAVA_OPTS=-Xms300m -Xmx300m"
     ports:
       - "9200:9200"
     volumes:
