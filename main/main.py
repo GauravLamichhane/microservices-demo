@@ -9,6 +9,12 @@ from sqlalchemy import UniqueConstraint
 from dotenv import load_dotenv
 from flask_migrate import Migrate
 from producer import publish
+from elasticsearch import Elasticsearch
+from flask import request
+
+es = Elasticsearch(os.environ.get("ELASTICSEARCH_URL", "http://elasticsearch:9200"))
+
+
 
 load_dotenv()
 
@@ -50,6 +56,23 @@ class ProductUser(db.Model):
     )
 
 cache = redis.Redis(host='redis', port=6379, decode_responses=True)
+
+@app.route("/api/search")
+def search():
+    query = request.args.get("q", "") #grabs the value after q= so query becomes "kafka". second args if q not provided to prevent from crashing
+    if not query:
+        return jsonify([])
+    
+    result = es.search(index="products", query={
+        "match_phrase_prefix": {"title": query}
+    }) # match means fuzzy relevance-ranked-text
+    #title says search within the title field for this search item
+
+    hits = [
+        {"id": hit["_id"], **hit["_source"]}
+        for hit in result["hits"]["hits"]
+    ]
+    return jsonify(hits)
 
 @app.route("/api/products")
 def index():
@@ -94,3 +117,4 @@ def like(id):
         
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0")
+

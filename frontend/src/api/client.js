@@ -42,3 +42,12 @@ export async function getProduct(id) {
   const { data } = await api.get(`/api/products/${id}/`);
   return data;
 }
+
+// search service
+export async function searchProducts(query) {
+  //{ data } extracts only the data field.
+  const { data } = await flaskApi.get(
+    `/api/search?q=${encodeURIComponent(query)}`, // convert special char into URL-safe format
+  );
+  return data;
+}

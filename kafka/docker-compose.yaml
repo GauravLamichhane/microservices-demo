@@ -29,6 +29,19 @@ services:
     networks:
       - microservices-net
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    networks:
+      - microservices-net
+
 networks:
   microservices-net:
     external: true
@@ -36,3 +49,4 @@ networks:
 volumes:
   kafka_data:
   mongo_data:
+  es_data:
