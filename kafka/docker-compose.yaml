@@ -1,6 +1,7 @@
 services:
   kafka:
     image: apache/kafka:3.9.0
+    mem_limit: 350m
     ports:
       - "9092:9092"
     environment:
@@ -15,32 +16,38 @@ services:
       - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
       - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
       - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
+      - KAFKA_HEAP_OPTS=-Xms192m -Xmx192m
     volumes:
       - kafka_data:/var/lib/kafka/data
     networks:
       - microservices-net
+    restart: unless-stopped
 
   mongo:
     image: mongo:7
+    mem_limit: 100m
     ports:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
     networks:
       - microservices-net
+    restart: unless-stopped
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    mem_limit: 400m
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
     ports:
       - "9200:9200"
     volumes:
       - es_data:/usr/share/elasticsearch/data
     networks:
       - microservices-net
+    restart: unless-stopped
 
 networks:
   microservices-net:

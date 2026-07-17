@@ -1,11 +1,10 @@
 import axios from "axios";
 
-//Django i.e admin service
-const baseURL = "http://localhost:8000";
+const baseURL = import.meta.env.VITE_ADMIN_API_URL || "http://localhost:8000";
 export const api = axios.create({ baseURL });
 
-// Flask i.e main service
-const flaskBaseURL = "http://localhost:8001";
+const flaskBaseURL =
+  import.meta.env.VITE_MAIN_API_URL || "http://localhost:8001";
 const flaskApi = axios.create({ baseURL: flaskBaseURL });
 
 export async function getAdminProducts() {

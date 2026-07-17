@@ -1,10 +1,12 @@
 services:
-  search-indexer:
+  search-indexer: # (or audit-logger)
     build: .
+    mem_limit: 50m
     env_file:
       - .env
     networks:
       - microservices-net
+    restart: unless-stopped
 
 networks:
   microservices-net:

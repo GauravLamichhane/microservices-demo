@@ -1,7 +1,7 @@
 services:
   backend:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    mem_limit: 80m
     env_file:
       - .env
     depends_on:
@@ -9,8 +9,7 @@ services:
       - redis
     ports:
       - "8000:8000"
-    volumes:
-      - .:/app
+    restart: unless-stopped
     networks:
       - microservices-net
       - default
@@ -18,17 +17,48 @@ services:
   queue:
     build: .
     command: "python consumer.py"
+    mem_limit: 60m
     env_file:
       - .env
     depends_on:
       - db
       - redis
+    restart: unless-stopped
+    networks:
+      - microservices-net
+      - default
+
+  celery-worker:
+    build: .
+    command: celery -A admin worker --loglevel=info --concurrency=2
+    mem_limit: 60m
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+    networks:
+      - microservices-net
+      - default
+
+  celery-beat:
+    build: .
+    command: celery -A admin beat --loglevel=info
+    mem_limit: 40m
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
     networks:
       - microservices-net
       - default
 
   db:
     image: postgres:17
+    mem_limit: 80m
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
@@ -37,36 +67,15 @@ services:
       - "5432:5432"
     volumes:
       - admin_postgres_data:/var/lib/postgresql/data/
+    restart: unless-stopped
 
   redis:
     image: redis:7-alpine
+    mem_limit: 30m
     ports:
       - "6380:6379"
+    restart: unless-stopped
     networks:
-      - default
-
-  celery-worker:
-    build: .
-    command: celery -A admin worker --loglevel=info
-    env_file:
-      - .env
-    depends_on:
-      - db
-      - redis
-    networks:
-      - microservices-net
-      - default
-
-  celery-beat:
-    build: .
-    command: celery -A admin beat --loglevel=info
-    env_file:
-      - .env
-    depends_on:
-      - db
-      - redis
-    networks:
-      - microservices-net
       - default
 
 volumes:

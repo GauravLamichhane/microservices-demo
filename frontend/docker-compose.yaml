@@ -1,0 +1,7 @@
+services:
+  frontend:
+    build: .
+    mem_limit: 20m
+    ports:
+      - "80:80"
+    restart: unless-stopped
