@@ -31,7 +31,7 @@ services:
   celery-worker:
     build: .
     command: celery -A admin worker --loglevel=info --concurrency=2
-    mem_limit: 60m
+    mem_limit: 120m
     env_file:
       - .env
     depends_on:
@@ -45,7 +45,7 @@ services:
   celery-beat:
     build: .
     command: celery -A admin beat --loglevel=info
-    mem_limit: 40m
+    mem_limit: 64m
     env_file:
       - .env
     depends_on:
