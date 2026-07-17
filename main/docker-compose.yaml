@@ -1,8 +1,7 @@
 services:
   backend:
     build: .
-    command: python main.py
-    mem_limit: 60m
+    mem_limit: 100m
     env_file:
       - .env
     environment:
