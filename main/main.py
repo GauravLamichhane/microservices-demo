@@ -93,10 +93,11 @@ def index():
     cache.setex("products", 30, json_lib.dumps(result))
     return jsonify(result)
 
+ADMIN_API_URL = os.environ.get("ADMIN_API_URL", "http://host.docker.internal:8000")
 
 @app.route("/api/products/<int:id>/like", methods = ['POST'])
 def like(id):
-    req = requests.get('http://host.docker.internal:8000/api/user')
+    req = requests.get(f'{ADMIN_API_URL}/api/user')
     print(req.status_code)
     print(req.text)
     data = req.json()
