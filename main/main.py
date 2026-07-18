@@ -11,10 +11,12 @@ from flask_migrate import Migrate
 from producer import publish
 from elasticsearch import Elasticsearch
 from flask import request
+from pymongo import MongoClient
 
 es = Elasticsearch(os.environ.get("ELASTICSEARCH_URL", "http://elasticsearch:9200"))
 
-
+mongo_client = MongoClient(os.environ.get("MONGO_URL", "mongodb://mongo:27017/"))
+audit_db = mongo_client["audit_log_db"]
 
 load_dotenv()
 
@@ -115,6 +117,16 @@ def like(id):
     return jsonify({
         'message': 'success'
     })
+
+@app.route("/api/audit-logs")
+def audit_logs():
+    limit = request.args.get("limit", default=50, type=init)
+    limit = min(limit, 200)
+
+    logs = list(
+        audit_db.audit_logs.find({}, {"_id": 0}).sort("timestamp", -1).limit(limit)
+    )
+    return jsonify(logs)
         
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0")
