@@ -4,7 +4,9 @@ from .models import Product
 from .producer import publish
 
 @receiver(post_save, sender=Product)
-def product_saved(sender, instance, created, **kwargs):
+def product_saved(sender, instance,created, update_fields=None, **kwargs):
+    if update_fields and set(update_fields) == {'likes'}:
+        return
     event_type = 'product_created' if created else 'product_updated'
     publish(event_type, {
         'id': instance.id,
