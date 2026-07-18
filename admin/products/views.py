@@ -4,8 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Product, User
 from .serializers import ProductSerializer
-# from .rabbitmq import publish
-from .producer import publish
+
 
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
@@ -25,7 +24,6 @@ class ProductViewSet(ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            publish('product_created', serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -34,16 +32,14 @@ class ProductViewSet(ModelViewSet):
         serializer = self.get_serializer(product, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            publish('product_updated', serializer.data)
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, *args, **kwargs):
         product = self.get_object()
-        pk = product.pk
         product.delete()
-        publish('product_deleted', pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class UserAPIView(APIView):
     def get(self, request):
