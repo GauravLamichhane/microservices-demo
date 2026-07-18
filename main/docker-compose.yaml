@@ -1,7 +1,7 @@
 services:
   backend:
     build: .
-    mem_limit: 100m
+    mem_limit: 130m
     env_file:
       - .env
     environment:
