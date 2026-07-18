@@ -35,7 +35,7 @@ for message in consumer:
     try:
         product = Product.objects.get(id=product_id)
         product.likes += 1
-        product.save()
+        product.save(update_fields=['likes'])
         print("Product likes increased")
     except Product.DoesNotExist:
         print(f"Product {product_id} not found, skipping")
