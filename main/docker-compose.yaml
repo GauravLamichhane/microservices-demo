@@ -9,8 +9,6 @@ services:
     depends_on:
       - db
       - redis
-    ports:
-      - "8001:5000"
     restart: unless-stopped
     networks:
       - microservices-net

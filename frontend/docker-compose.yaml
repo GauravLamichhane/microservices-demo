@@ -5,3 +5,10 @@ services:
     ports:
       - "80:80"
     restart: unless-stopped
+    networks:
+      - microservices-net
+      - default
+
+networks:
+  microservices-net:
+    external: true

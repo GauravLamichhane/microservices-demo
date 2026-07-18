@@ -1,52 +1,53 @@
 import axios from "axios";
 
-const baseURL = import.meta.env.VITE_ADMIN_API_URL || "http://localhost:8000";
+const baseURL = import.meta.env.VITE_ADMIN_API_URL || "/api/admin";
 export const api = axios.create({ baseURL });
 
-const flaskBaseURL =
-  import.meta.env.VITE_MAIN_API_URL || "http://localhost:8001";
+const flaskBaseURL = import.meta.env.VITE_MAIN_API_URL || "/api/main";
 const flaskApi = axios.create({ baseURL: flaskBaseURL });
 
 export async function getAdminProducts() {
-  const { data } = await api.get("/api/products/");
+  const { data } = await api.get("/products/");
   return data;
 }
 
 export async function getMainProducts() {
-  const { data } = await flaskApi.get("/api/products"); // Flask
+  const { data } = await flaskApi.get("/products"); // Flask
   return data;
 }
 
 export async function likeProduct(id) {
-  const { data } = await flaskApi.post(`/api/products/${id}/like`);
+  const { data } = await flaskApi.post(`/products/${id}/like`);
   return data;
 }
 
 export async function createProduct(payload) {
-  const { data } = await api.post("/api/products/", payload);
+  const { data } = await api.post("/products/", payload);
   return data;
 }
 
 export async function updateProduct(id, payload) {
-  const { data } = await api.put(`/api/products/${id}/`, payload);
+  const { data } = await api.put(`/products/${id}/`, payload);
   return data;
 }
 
 export async function deleteProduct(id) {
-  const { data } = await api.delete(`/api/products/${id}/`);
+  const { data } = await api.delete(`/products/${id}/`);
   return data;
 }
 
 export async function getProduct(id) {
-  const { data } = await api.get(`/api/products/${id}/`);
+  const { data } = await api.get(`/products/${id}/`);
   return data;
 }
 
 // search service
 export async function searchProducts(query) {
-  //{ data } extracts only the data field.
-  const { data } = await flaskApi.get(
-    `/api/search?q=${encodeURIComponent(query)}`, // convert special char into URL-safe format
-  );
+  const { data } = await flaskApi.get(`/search?q=${encodeURIComponent(query)}`);
+  return data;
+}
+
+export async function getAuditLogs(limit = 50) {
+  const { data } = await flaskApi.get(`/audit-logs?limit=${limit}`);
   return data;
 }
