@@ -19,7 +19,7 @@ services:
   queue:
     build: .
     command: "python consumer.py"
-    mem_limit: 60m
+    mem_limit: 100m
     env_file:
       - .env
     depends_on:
