@@ -120,7 +120,7 @@ def like(id):
 
 @app.route("/api/audit-logs")
 def audit_logs():
-    limit = request.args.get("limit", default=50, type=init)
+    limit = request.args.get("limit", default=50, type=int)
     limit = min(limit, 200)
 
     logs = list(
