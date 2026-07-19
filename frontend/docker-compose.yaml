@@ -4,6 +4,9 @@ services:
     mem_limit: 20m
     ports:
       - "80:80"
+      - "443:443"
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     restart: unless-stopped
     networks:
       - microservices-net
