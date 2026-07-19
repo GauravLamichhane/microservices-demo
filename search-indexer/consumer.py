@@ -34,6 +34,7 @@ for message in consumer:
         es.index(index=INDEX_NAME, id=data["id"], document={
             "title": data["title"],
             "image": data["image"],
+            "likes": data.get("likes", 0),
         })
         print(f"Indexed product {data['id']}")
 
