@@ -1,6 +1,6 @@
 services:
   backend:
-    image: ghcr.io/GauravLamichhane/microservices-demo/admin:latest
+    image: ghcr.io/gauravlamichhane/microservices-demo/admin:latest
     mem_limit: 150m
     env_file:
       - .env
@@ -15,7 +15,7 @@ services:
       - default
 
   queue:
-    image: ghcr.io/GauravLamichhane/microservices-demo/admin:latest
+    image: ghcr.io/gauravlamichhane/microservices-demo/admin:latest
     command: "python consumer.py"
     mem_limit: 60m
     env_file:
@@ -29,7 +29,7 @@ services:
       - default
 
   celery-worker:
-    image: ghcr.io/GauravLamichhane/microservices-demo/admin:latest
+    image: ghcr.io/gauravlamichhane/microservices-demo/admin:latest
     command: celery -A admin worker --loglevel=info --concurrency=2
     mem_limit: 120m
     env_file:
@@ -43,7 +43,7 @@ services:
       - default
 
   celery-beat:
-    image: ghcr.io/GauravLamichhane/microservices-demo/admin:latest
+    image: ghcr.io/gauravlamichhane/microservices-demo/admin:latest
     command: celery -A admin beat --loglevel=info
     mem_limit: 64m
     env_file:
