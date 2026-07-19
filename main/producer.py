@@ -25,7 +25,7 @@ def publish(method, body):
         print(f"Kafka producer not initialized, dropping event: {method}")
         return
     producer.send(
-        "product-events",  # or "product-likes" depending on which producer.py this is
+        "product-likes",  # or "product-likes" depending on which producer.py this is
         value=body,
         headers=[("type", method.encode("utf-8"))]
     )
