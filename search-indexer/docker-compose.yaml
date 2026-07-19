@@ -1,6 +1,6 @@
 services:
   search-indexer: # (or audit-logger)
-    build: .
+    image: ghcr.io/GauravLamichhane/microservices-demo/search-indexer:latest
     mem_limit: 50m
     env_file:
       - .env

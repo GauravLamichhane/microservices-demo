@@ -1,6 +1,6 @@
 services:
   backend:
-    build: .
+    image: ghcr.io/GauravLamichhane/microservices-demo/main:latest
     mem_limit: 130m
     env_file:
       - .env
@@ -17,7 +17,7 @@ services:
       - default
 
   queue:
-    build: .
+    image: ghcr.io/GauravLamichhane/microservices-demo/main:latest
     command: "python consumer.py"
     mem_limit: 100m
     env_file:

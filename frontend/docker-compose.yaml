@@ -1,6 +1,6 @@
 services:
   frontend:
-    build: .
+    image: ghcr.io/GauravLamichhane/microservices-demo/frontend:latest
     mem_limit: 20m
     ports:
       - "80:80"

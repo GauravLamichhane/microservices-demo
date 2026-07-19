@@ -1,6 +1,6 @@
 services:
   audit-logger:
-    build: .
+    image: ghcr.io/GauravLamichhane/microservices-demo/audit-logger:latest
     mem_limit: 50m
     environment:
       - PYTHONUNBUFFERED=1

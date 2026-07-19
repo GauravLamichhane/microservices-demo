@@ -1,19 +1,21 @@
 services:
   backend:
-    build: .
+    image: ghcr.io/GauravLamichhane/microservices-demo/admin:latest
     mem_limit: 150m
     env_file:
       - .env
     depends_on:
       - db
       - redis
+    ports:
+      - "8000:8000"
     restart: unless-stopped
     networks:
       - microservices-net
       - default
 
   queue:
-    build: .
+    image: ghcr.io/GauravLamichhane/microservices-demo/admin:latest
     command: "python consumer.py"
     mem_limit: 60m
     env_file:
@@ -27,7 +29,7 @@ services:
       - default
 
   celery-worker:
-    build: .
+    image: ghcr.io/GauravLamichhane/microservices-demo/admin:latest
     command: celery -A admin worker --loglevel=info --concurrency=2
     mem_limit: 120m
     env_file:
@@ -41,7 +43,7 @@ services:
       - default
 
   celery-beat:
-    build: .
+    image: ghcr.io/GauravLamichhane/microservices-demo/admin:latest
     command: celery -A admin beat --loglevel=info
     mem_limit: 64m
     env_file:
