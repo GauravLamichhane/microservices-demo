@@ -110,6 +110,7 @@ def like(id):
         db.session.commit()
 
         publish('product_liked', id)
+        print(f"Publishing like for product {id}")
         cache.delete("products") # invalidate cache since like changed
     except:
         db.session.rollback()
