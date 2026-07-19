@@ -108,12 +108,13 @@ def like(id):
         productUser = ProductUser(user_id = data['id'], product_id = id)
         db.session.add(productUser)
         db.session.commit()
-
+        print("Before published")
         publish('product_liked', id)
         print(f"Publishing like for product {id}")
         cache.delete("products") # invalidate cache since like changed
-    except:
+    except Exception as e:
         db.session.rollback()
+        print("Error:", e)
         abort(400, "You already liked this product")
     return jsonify({
         'message': 'success'
