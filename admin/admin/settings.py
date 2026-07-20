@@ -127,7 +127,7 @@ from celery.schedules import crontab
 CELERY_BEAT_SCHEDULE = {
     'reconcile-products-every-10-minutes': {
         'task': 'products.tasks.reconcile_products',
-        'schedule': crontab(minute='*/10'),
+        'schedule': crontab(minute='*/1'),
     },
 }
 
