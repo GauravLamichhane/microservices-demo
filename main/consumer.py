@@ -29,8 +29,14 @@ for message in consumer:
     headers = dict(message.headers or [])
     event_type = headers.get("type", b"").decode("utf-8")
     data = message.value
-    print("Received in admin")
-    print(data)
+    print(
+    f"Received {event_type} "
+    f"for product {data.get('id')}")
+    print(
+    f"Topic={message.topic}, "
+    f"Partition={message.partition}, "
+    f"Offset={message.offset}"
+    )
 
     with app.app_context():
         if event_type == "product_created":
@@ -73,5 +79,7 @@ for message in consumer:
                 print("Product deleted")
             else:
                 print(f"Product {data} not found in Flask DB, skipping delete")
+        else:
+            print(f"Unknown event: {event_type}")
 
     consumer.commit()
