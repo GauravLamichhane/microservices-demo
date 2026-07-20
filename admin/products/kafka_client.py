@@ -3,20 +3,23 @@ from kafka import KafkaProducer
 from kafka.errors import NoBrokersAvailable
 import time
 
-_producer = None
-
 def get_kafka_producer():
     global _producer
 
     if _producer is not None:
-        return _producer
+        try:
+            if _producer.bootstrap_connected():
+                return _producer
+        except Exception:
+            _producer.close()
+            _producer = None
 
     for attempt in range(10):
         try:
             _producer = KafkaProducer(
                 bootstrap_servers=os.environ.get(
                     "KAFKA_BOOTSTRAP_SERVERS",
-                    "kafka:9092"
+                    "kafka:9092",
                 ),
                 value_serializer=lambda v: (
                     v if isinstance(v, bytes)
@@ -24,6 +27,8 @@ def get_kafka_producer():
                 ),
                 retries=5,
                 retry_backoff_ms=1000,
+                reconnect_backoff_ms=1000,
+                reconnect_backoff_max_ms=5000,
             )
             return _producer
 

@@ -41,7 +41,10 @@ for message in consumer:
                 product = Product(id=data["id"], title=data["title"], image=data["image"])
                 db.session.add(product)
                 db.session.commit()
-                cache.delete("products")
+                try:
+                    cache.delete("products")
+                except redis.exceptions.RedisError:
+                    pass
                 print("Product Created")
 
         elif event_type == "product_updated":
@@ -50,7 +53,10 @@ for message in consumer:
                 product.title = data["title"]
                 product.image = data["image"]
                 db.session.commit()
-                cache.delete("products")
+                try:
+                    cache.delete("products")
+                except redis.exceptions.RedisError:
+                    pass
                 print("Product Updated")
             else:
                 print(f"Product {data['id']} not found in Flask DB, skipping update")
@@ -60,7 +66,10 @@ for message in consumer:
             if product:
                 db.session.delete(product)
                 db.session.commit()
-                cache.delete("products")
+                try:
+                    cache.delete("products")
+                except redis.exceptions.RedisError:
+                    pass
                 print("Product deleted")
             else:
                 print(f"Product {data} not found in Flask DB, skipping delete")

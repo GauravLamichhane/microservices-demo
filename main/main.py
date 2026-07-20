@@ -78,9 +78,12 @@ def search():
 
 @app.route("/api/products")
 def index():
-    cached = cache.get("products")
-    if cached:
-        return jsonify(json_lib.loads(cached))
+    try:
+        cached = cache.get("products")
+        if cached:
+            return jsonify(json_lib.loads(cached))
+    except redis.exceptions.RedisError:
+        print("Redis unavailable, falling back to PostgreSQL")
     products = Product.query.all()  
     result = [
         {
@@ -91,8 +94,10 @@ def index():
         }
         for p in products
     ]
-
-    cache.setex("products", 30, json_lib.dumps(result))
+    try:
+        cache.setex("products", 30, json_lib.dumps(result))
+    except redis.exceptions.RedisError:
+        pass
     return jsonify(result)
 
 ADMIN_API_URL = os.environ.get("ADMIN_API_URL", "http://host.docker.internal:8000")
