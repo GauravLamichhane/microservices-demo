@@ -1,7 +1,48 @@
+import json
 import requests
 from celery import shared_task
-from .models import Product
+from .models import Product, PublishedEvent
 from .producer import publish
+from .kafka_client import get_kafka_producer
+
+
+@shared_task
+def publish_events_to_kafka():
+    producer = get_kafka_producer()
+
+    if producer is None:
+        return "Kafka producer unavailable, skipping this run"
+
+    events = PublishedEvent.objects.filter(is_consumed=False)[:50]
+
+    if not events.exists():
+        return "No new events found"
+
+    success_count = 0
+    for event in events:
+        try:
+            value_bytes = json.dumps(event.payload).encode("utf-8")
+            event_type = event.extra.get("type", "")
+            headers = [("type", event_type.encode("utf-8"))]
+
+            future = producer.send(
+                event.channel,
+                value=value_bytes,
+                headers=headers,
+            )
+            # Block briefly to confirm delivery before marking as consumed
+            future.get(timeout=5)
+
+            event.is_consumed = True
+            event.save(update_fields=["is_consumed"])
+            success_count += 1
+
+        except Exception as e:
+            print(f"Failed to publish event {event.id}, will retry next run: {e}")
+            continue
+
+    producer.flush()
+    return f"Published {success_count} events"
 
 @shared_task
 def reconcile_products():

@@ -125,10 +125,14 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 from celery.schedules import crontab
 
 CELERY_BEAT_SCHEDULE = {
-    'reconcile-products-every-10-minutes': {
-        'task': 'products.tasks.reconcile_products',
-        'schedule': crontab(minute='*/1'),
+    'publish-outbox-events': {
+        'task': 'products.tasks.publish_events_to_kafka',
+        'schedule': 15.0,  # every 15 seconds
     },
+    # 'reconcile-products-every-10-minutes': {
+    #     'task': 'products.tasks.reconcile_products',
+    #     'schedule': crontab(minute='*/10'),
+    # },
 }
 
 STORAGES = {
