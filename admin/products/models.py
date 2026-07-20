@@ -10,3 +10,12 @@ class Product(models.Model):
 
 class User(models.Model):
   pass
+
+
+class PublishedEvent(models.Model):
+  channel = models.CharField(max_length=100) # product-events
+  payload = models.JSONField()
+  extra = models.JSONField(default=dict, blank=True) #event type headers
+  is_consumed = models.BooleanField(default=False)
+  created_at = models.DateTimeField(auto_now_add=True)
+  
