@@ -1,0 +1,60 @@
+services:
+  backend:
+    build: .
+    mem_limit: 130m
+    env_file:
+      - .env
+    environment:
+      - FLASK_APP=main.py
+    depends_on:
+      - db
+      - redis
+    ports:
+      - "8001:5000"
+    restart: unless-stopped
+    networks:
+      - microservices-net
+      - default
+
+  queue:
+    build: .
+    command: "python consumer.py"
+    mem_limit: 100m
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+    networks:
+      - microservices-net
+      - default
+
+  db:
+    image: postgres:17
+    mem_limit: 80m
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - flask_postgres_data:/var/lib/postgresql/data/
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    mem_limit: 30m
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - default
+
+volumes:
+  flask_postgres_data:
+
+networks:
+  microservices-net:
+    external: true
