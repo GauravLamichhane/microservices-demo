@@ -2,18 +2,23 @@ import json
 import requests
 from celery import shared_task
 from .models import Product, PublishedEvent
-from .producer import publish
+# from .producer import publish
 from .kafka_client import get_kafka_producer
 
 
 @shared_task
 def publish_events_to_kafka():
+    print("=" * 60)
+    print("Running publish_events_to_kafka")
     producer = get_kafka_producer()
 
     if producer is None:
         return "Kafka producer unavailable, skipping this run"
 
     events = PublishedEvent.objects.filter(is_consumed=False)[:50]
+
+    print("Pending events:", events.count())
+
 
     if not events.exists():
         return "No new events found"
@@ -25,6 +30,8 @@ def publish_events_to_kafka():
             event_type = event.extra.get("type", "")
             headers = [("type", event_type.encode("utf-8"))]
 
+            print("Publishing event", event.id)
+
             future = producer.send(
                 event.channel,
                 value=value_bytes,
@@ -33,9 +40,12 @@ def publish_events_to_kafka():
             # Block briefly to confirm delivery before marking as consumed
             future.get(timeout=5)
 
+            print("Kafka ACK received")
+
             event.is_consumed = True
             event.save(update_fields=["is_consumed"])
             success_count += 1
+            print("Marked consumed")
 
         except Exception as e:
             print(f"Failed to publish event {event.id}, will retry next run: {e}")
@@ -62,17 +72,27 @@ def reconcile_products():
 
     for product_id in missing_in_flask:
         product = django_products[product_id]
-        publish('product_created', {
-            'id': product.id,
-            'title': product.title,
-            'image': product.image,
-            'likes': product.likes,
-        })
+
+        PublishedEvent.objects.create(
+            channel="product-events",
+            payload={
+                "id": product.id,
+                "title": product.title,
+                "image": product.image,
+                "likes": product.likes,
+            },
+            extra={"type": "product_created"},
+        )
+
+        print(f"Created outbox event for {product.id}")
         print(f"Re-published missing product {product_id} to Kafka")
 
     for product_id in extra_in_flask:
-        publish('product_deleted', product_id)
-        print(f"Published delete for ghost product {product_id}")
+        PublishedEvent.objects.create(
+            channel="product-events",
+            payload=product_id,
+            extra={"type": "product_deleted"},
+        )
 
     if not missing_in_flask and not extra_in_flask:
         print("Reconciliation check passed: Django and Flask are in sync")

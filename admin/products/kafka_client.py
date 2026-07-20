@@ -5,18 +5,30 @@ import time
 
 _producer = None
 
-
 def get_kafka_producer():
     global _producer
-    if _producer is None:
-        for attempt in range(10):
-            try:
-                _producer = KafkaProducer(
-                    bootstrap_servers=os.environ.get("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092"),
-                    value_serializer=lambda v: v if isinstance(v, bytes) else v.encode("utf-8"),
-                )
-                break
-            except NoBrokersAvailable:
-                print(f"Kafka not ready, retrying producer init ({attempt+1}/10)...")
-                time.sleep(3)
-    return _producer
+
+    if _producer is not None:
+        return _producer
+
+    for attempt in range(10):
+        try:
+            _producer = KafkaProducer(
+                bootstrap_servers=os.environ.get(
+                    "KAFKA_BOOTSTRAP_SERVERS",
+                    "kafka:9092"
+                ),
+                value_serializer=lambda v: (
+                    v if isinstance(v, bytes)
+                    else v.encode("utf-8")
+                ),
+                retries=5,
+                retry_backoff_ms=1000,
+            )
+            return _producer
+
+        except NoBrokersAvailable:
+            print(f"Attempt {attempt + 1}/10 failed")
+            time.sleep(3)
+
+    return None
