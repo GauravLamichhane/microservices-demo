@@ -31,7 +31,7 @@ services:
   celery-worker:
     image: ghcr.io/gauravlamichhane/microservices-demo/admin:latest
     command: celery -A admin worker --loglevel=info --concurrency=2
-    mem_limit: 120m
+    mem_limit: 200m
     env_file:
       - .env
     depends_on:
@@ -45,7 +45,7 @@ services:
   celery-beat:
     image: ghcr.io/gauravlamichhane/microservices-demo/admin:latest
     command: celery -A admin beat --loglevel=info
-    mem_limit: 64m
+    mem_limit: 100m
     env_file:
       - .env
     depends_on:

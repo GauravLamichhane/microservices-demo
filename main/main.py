@@ -81,7 +81,7 @@ def index():
     cached = cache.get("products")
     if cached:
         return jsonify(json_lib.loads(cached))
-    products = Product.query.all()
+    products = Product.query.all()  
     result = [
         {
             "id": p.id,
