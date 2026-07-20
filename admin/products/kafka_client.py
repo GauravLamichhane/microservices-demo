@@ -1,7 +1,10 @@
 import os
+import time
 from kafka import KafkaProducer
 from kafka.errors import NoBrokersAvailable
-import time
+
+_producer = None
+
 
 def get_kafka_producer():
     global _producer
@@ -11,7 +14,10 @@ def get_kafka_producer():
             if _producer.bootstrap_connected():
                 return _producer
         except Exception:
-            _producer.close()
+            try:
+                _producer.close()
+            except Exception:
+                pass
             _producer = None
 
     for attempt in range(10):
