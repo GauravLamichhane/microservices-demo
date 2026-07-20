@@ -57,6 +57,14 @@ class ProductUser(db.Model):
         ),
     )
 
+class PublishedEvent(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    channel = db.Column(db.String(100), nullable=False)
+    payload = db.Column(db.JSON, nullable=False)
+    extra = db.Column(db.JSON, default=dict)
+    is_consumed = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+
 cache = redis.Redis(host='redis', port=6379, decode_responses=True)
 
 @app.route("/api/search")

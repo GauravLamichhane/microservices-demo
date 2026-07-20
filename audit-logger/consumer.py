@@ -39,6 +39,11 @@ for message in consumer:
   }
 
   collection.insert_one(log_entry)
-  print(f"Logged: {event_type}")
+  print(
+    f"[{message.topic}] "
+    f"{event_type} "
+    f"offset={message.offset} "
+    f"payload={message.value}"
+)
 
   consumer.commit()
