@@ -20,11 +20,10 @@ def get_presigned_upload_url(object_name):
         object_name,
         expires=timedelta(minutes=15),
     )
-    # Replace internal hostname with the externally-reachable one
     internal = os.environ.get("MINIO_INTERNAL_ENDPOINT", "minio:9000")
     external = os.environ.get("MINIO_EXTERNAL_ENDPOINT", "localhost:9000")
-    return url.replace(internal, external)
-
+    url = url.replace(f"http://{internal}", f"https://{external}/minio")
+    return url
 def get_public_url(object_name):
     external = os.environ.get("MINIO_EXTERNAL_ENDPOINT", "localhost:9000")
-    return f"http://{external}/{BUCKET_NAME}/{object_name}"
+    return f"https://{external}/{BUCKET_NAME}/{object_name}"

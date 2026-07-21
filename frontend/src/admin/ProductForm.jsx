@@ -40,6 +40,8 @@ export default function ProductForm() {
     setError("");
     try {
       const { upload_url, public_url } = await getUploadUrl(file.name);
+      console.log(upload_url);
+      console.log(public_url);
       await axios.put(upload_url, file, {
         headers: { "Content-Type": file.type },
       });
