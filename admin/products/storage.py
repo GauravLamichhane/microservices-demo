@@ -13,7 +13,6 @@ minio_client = Minio(
 
 BUCKET_NAME = os.environ.get("MINIO_BUCKET", "products-images")
 
-
 def get_presigned_upload_url(object_name):
     url = minio_client.presigned_put_object(
         BUCKET_NAME,
@@ -24,6 +23,8 @@ def get_presigned_upload_url(object_name):
     external = os.environ.get("MINIO_EXTERNAL_ENDPOINT", "localhost:9000")
     url = url.replace(f"http://{internal}", f"https://{external}/minio")
     return url
+
+
 def get_public_url(object_name):
     external = os.environ.get("MINIO_EXTERNAL_ENDPOINT", "localhost:9000")
-    return f"https://{external}/{BUCKET_NAME}/{object_name}"
+    return f"https://{external}/minio/{BUCKET_NAME}/{object_name}"
