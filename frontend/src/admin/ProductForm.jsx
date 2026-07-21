@@ -110,7 +110,12 @@ export default function ProductForm() {
 
       <div className="mb-4">
         <label className="mb-2 block">Product Image</label>
-        <input type="file" accept="image/*" onChange={handleFileChange} />
+        <input
+          className="rounded bg-blue-400 px-4 py-2"
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+        />
         {uploading && <p className="text-sm text-gray-500">Uploading…</p>}
         {image && !uploading && (
           <div className="mt-2">
