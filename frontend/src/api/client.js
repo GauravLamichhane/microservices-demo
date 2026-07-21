@@ -51,3 +51,8 @@ export async function getAuditLogs(limit = 50) {
   const { data } = await flaskApi.get(`/audit-logs?limit=${limit}`);
   return data;
 }
+
+export async function getUploadUrl(filename) {
+  const { data } = await api.post("/products/upload-url/", { filename });
+  return data;
+}

@@ -1,9 +1,13 @@
+import uuid
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.views import APIView
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Product, User
 from .serializers import ProductSerializer
+from .storage import get_presigned_upload_url, get_public_url
+
 
 
 class ProductViewSet(ModelViewSet):
@@ -53,3 +57,18 @@ class UserAPIView(APIView):
         return Response({
             "id": user.id
         })
+
+@api_view(['POST'])
+def get_upload_url(request):
+    filename = request.data.get('filename', 'image.jpg')
+    extension = filename.split('.')[-1] if '.' in filename else 'jpg'
+    object_name = f"products/{uuid.uuid4()}.{extension}"
+
+    upload_url = get_presigned_upload_url(object_name)
+    public_url = get_public_url(object_name)
+
+    return Response({
+        'upload_url': upload_url,
+        'object_name': object_name,
+        'public_url': public_url,
+    })
