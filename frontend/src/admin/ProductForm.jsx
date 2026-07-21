@@ -1,21 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
-import {
-  createProduct,
-  getProduct,
-  updateProduct,
-  getUploadUrl,
-} from "../api/client";
+import { createProduct, getProduct, updateProduct } from "../api/client";
 
 export default function ProductForm() {
-  const { id } = useParams();
+  const { id } = useParams(); // present only on the edit route
   const isEditing = Boolean(id);
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
   const [image, setImage] = useState("");
-  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(isEditing);
@@ -32,29 +25,9 @@ export default function ProductForm() {
       .finally(() => setLoading(false));
   }, [id, isEditing]);
 
-  async function handleFileChange(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    setUploading(true);
-    setError("");
-    try {
-      const { upload_url, public_url } = await getUploadUrl(file.name);
-      console.log(upload_url);
-      console.log(public_url);
-      await axios.put(upload_url, file, {
-        headers: { "Content-Type": file.type },
-      });
-      setImage(public_url);
-    } catch (err) {
-      setError("Failed to upload image.");
-    } finally {
-      setUploading(false);
-    }
-  }
-
   async function handleSubmit(e) {
     e.preventDefault();
+
     setError("");
 
     if (!title.trim()) {
@@ -63,7 +36,7 @@ export default function ProductForm() {
     }
 
     if (!image.trim()) {
-      setError("Please upload an image.");
+      setError("Image URL is required.");
       return;
     }
 
@@ -111,28 +84,19 @@ export default function ProductForm() {
       </div>
 
       <div className="mb-4">
-        <label className="mb-2 block">Product Image</label>
+        <label className="mb-2 block">Image URL</label>
         <input
-          className="rounded bg-blue-400 px-4 py-2"
-          type="file"
-          accept="image/*"
-          onChange={handleFileChange}
+          type="text"
+          className="w-2xl rounded border p-2"
+          value={image}
+          onChange={(e) => setImage(e.target.value)}
+          placeholder="Enter product image URL"
         />
-        {uploading && <p className="text-sm text-gray-500">Uploading…</p>}
-        {image && !uploading && (
-          <div className="mt-2">
-            <img
-              src={image}
-              alt="Preview"
-              className="h-24 w-24 rounded object-cover"
-            />
-          </div>
-        )}
       </div>
 
       <button
         type="submit"
-        disabled={saving || uploading}
+        disabled={saving}
         className="rounded bg-blue-400 px-4 py-2 text-white disabled:opacity-50 cursor-pointer hover:bg-blue-600"
       >
         {saving
