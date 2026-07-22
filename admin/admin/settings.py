@@ -28,7 +28,8 @@ INSTALLED_APPS = [
     "corsheaders",
     "products",
     "rest_framework",
-    "django_celery_beat"
+    "django_celery_beat",
+    "channels",
 ]
 
 MIDDLEWARE = [
@@ -61,7 +62,16 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'admin.wsgi.application'
+ASGI_APPLICATION = 'admin.asgi.application'
 
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [os.environ.get("CELERY_BROKER_URL", "redis://redis:6379/0")],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
