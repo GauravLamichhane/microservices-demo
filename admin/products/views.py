@@ -58,12 +58,18 @@ class UserAPIView(APIView):
             "id": user.id
         })
 
+
+ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'webp'}
+
 @api_view(['POST'])
 def get_upload_url(request):
     filename = request.data.get('filename', 'image.jpg')
-    extension = filename.split('.')[-1] if '.' in filename else 'jpg'
-    object_name = f"products/{uuid.uuid4()}.{extension}"
+    extension = filename.split('.')[-1].lower() if '.' in filename else ''
 
+    if extension not in ALLOWED_EXTENSIONS:
+        return Response({'error': 'Invalid file type'}, status=400)
+
+    object_name = f"products/{uuid.uuid4()}.{extension}"
     upload_url = get_presigned_upload_url(object_name)
     public_url = get_public_url(object_name)
 

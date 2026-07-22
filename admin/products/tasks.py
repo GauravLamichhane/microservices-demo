@@ -37,7 +37,7 @@ def publish_events_to_kafka():
                 value=value_bytes,
                 headers=headers,
             )
-            # Block briefly to confirm delivery before marking as consumed
+            # Block briefly to confirm delivery before marking as consumed i.e ack
             future.get(timeout=5)
 
             print("Kafka ACK received")
