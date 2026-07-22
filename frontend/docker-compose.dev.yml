@@ -1,0 +1,16 @@
+services:
+  frontend:
+    build: .
+    mem_limit: 20m
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    networks:
+      - microservices-net
+      - default
+    volumes:
+      - ./nginx.local.conf:/etc/nginx/conf.d/default.conf:ro
+
+networks:
+  microservices-net:
+    external: true

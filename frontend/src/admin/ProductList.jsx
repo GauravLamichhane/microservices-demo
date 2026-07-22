@@ -19,6 +19,21 @@ export default function ProductList() {
   }
   useEffect(() => {
     loadProducts();
+    const socket = new WebSocket("ws://localhost/ws/likes/");
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      setProducts((prev) =>
+        prev.map((product) =>
+          product.id === data.product_id
+            ? { ...product, likes: data.likes }
+            : product,
+        ),
+      );
+    };
+
+    return () => socket.close();
   }, []);
 
   return (
