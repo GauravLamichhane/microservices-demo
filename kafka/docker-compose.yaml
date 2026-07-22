@@ -76,6 +76,8 @@ services:
     depends_on:
       - kafka
     restart: unless-stopped
+    networks:
+      - microservices-net
 
 networks:
   microservices-net:
