@@ -29,9 +29,10 @@ for message in consumer:
     headers = dict(message.headers or [])
     event_type = headers.get("type", b"").decode("utf-8")
     data = message.value
-    print(
-    f"Received {event_type} "
-    f"for product {data.get('id')}")
+    if event_type == "product_deleted":
+        print(f"Received {event_type} for product {data}")
+    else:
+        print(f"Received {event_type} for product {data.get('id')}")
     print(
     f"Topic={message.topic}, "
     f"Partition={message.partition}, "
