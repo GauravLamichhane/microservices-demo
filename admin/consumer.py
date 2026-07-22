@@ -49,6 +49,7 @@ for message in consumer:
                 "likes": product.likes,
             },
         )
+        print("WebSocket event sent")
 
         print("Product likes increased")
     except Product.DoesNotExist:

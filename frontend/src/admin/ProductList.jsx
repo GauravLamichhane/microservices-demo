@@ -25,6 +25,9 @@ export default function ProductList() {
     const socket = new WebSocket(
       `${protocol}://${window.location.host}/ws/likes/`,
     );
+    socket.onopen = () => console.log("WS Connected");
+    socket.onclose = (e) => console.log("WS Closed", e);
+    socket.onerror = (e) => console.log("WS Error", e);
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
