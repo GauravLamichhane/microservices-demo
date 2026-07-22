@@ -19,7 +19,12 @@ export default function ProductList() {
   }
   useEffect(() => {
     loadProducts();
-    const socket = new WebSocket("ws://localhost/ws/likes/");
+
+    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+
+    const socket = new WebSocket(
+      `${protocol}://${window.location.host}/ws/likes/`,
+    );
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);

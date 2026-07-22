@@ -7,6 +7,8 @@ import time
 from kafka import KafkaConsumer
 from kafka.errors import NoBrokersAvailable
 from products.models import Product
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 consumer = None
 for attempt in range(10):
@@ -35,7 +37,19 @@ for message in consumer:
     try:
         product = Product.objects.get(id=product_id)
         product.likes += 1
-        product.save(update_fields=['likes'])
+        product.save(update_fields=["likes"])
+
+        channel_layer = get_channel_layer()
+
+        async_to_sync(channel_layer.group_send)(
+            "likes",
+            {
+                "type": "like_updated",
+                "product_id": product.id,
+                "likes": product.likes,
+            },
+        )
+
         print("Product likes increased")
     except Product.DoesNotExist:
         print(f"Product {product_id} not found, skipping")
