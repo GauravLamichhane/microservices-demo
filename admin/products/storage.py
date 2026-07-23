@@ -2,11 +2,8 @@ import os
 from minio import Minio
 from datetime import timedelta
 
-internal_endpoint = os.environ["MINIO_INTERNAL_ENDPOINT"]
-external_endpoint = os.environ["MINIO_EXTERNAL_ENDPOINT"]
-
 minio_client = Minio(
-    internal_endpoint,
+    os.environ.get("MINIO_ENDPOINT", "173.231.235.106:9000"),
     access_key=os.environ.get("MINIO_ACCESS_KEY", "minioadmin"),
     secret_key=os.environ.get("MINIO_SECRET_KEY", "minioadmin123"),
     secure=True,
@@ -20,4 +17,5 @@ def get_presigned_upload_url(object_name):
 
 
 def get_public_url(object_name):
-    return f"https://{external_endpoint}/{BUCKET_NAME}/{object_name}"
+    endpoint = os.environ.get("MINIO_ENDPOINT", "173.231.235.106:9000")
+    return f"https://{os.environ['MINIO_ENDPOINT']}/{BUCKET_NAME}/{object_name}"
