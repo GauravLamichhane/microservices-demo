@@ -65,7 +65,13 @@ class PublishedEvent(db.Model):
     is_consumed = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 
-cache = redis.Redis(host='redis', port=6379, decode_responses=True)
+cache = redis.Redis(
+    host='redis',
+    port=6379,
+    decode_responses=True,
+    socket_connect_timeout=1,
+    socket_timeout=1,
+)
 
 @app.route("/api/search")
 def search():
