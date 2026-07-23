@@ -118,9 +118,11 @@ ADMIN_API_URL = os.environ.get("ADMIN_API_URL", "http://host.docker.internal:800
 
 @app.route("/api/products/<int:id>/like", methods = ['POST'])
 def like(id):
-    req = requests.get(f'{ADMIN_API_URL}/api/user')
-    print(req.status_code)
-    print(req.text)
+    req = requests.get(f"{ADMIN_API_URL}/admin/api/user")
+    print("Status:", req.status_code)
+    print("Content-Type:", req.headers.get("Content-Type"))
+    print("Body:", req.text)
+
     data = req.json()
 
     try:
