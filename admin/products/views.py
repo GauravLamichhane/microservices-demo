@@ -9,6 +9,8 @@ from .models import Product, User
 from .serializers import ProductSerializer
 from .storage import get_presigned_upload_url, get_public_url
 import uuid
+from rest_framework import serializers
+from drf_spectacular.utils import inline_serializer
 
 
 @extend_schema_view(
@@ -89,7 +91,12 @@ class ProductViewSet(ModelViewSet):
     description="Returns the ID of a randomly selected existing user. Used to simulate "
                 "'current user' identity for the like feature, since no real auth is implemented.",
     tags=["Users"],
-    responses={200: {"type": "object", "properties": {"id": {"type": "integer"}}}, 404: None},
+    responses=inline_serializer(
+    name="RandomUserResponse",
+    fields={
+        "id": serializers.IntegerField(),
+    },
+)
 )
 class UserAPIView(APIView):
     def get(self, request):
@@ -112,18 +119,37 @@ ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'webp'}
         "`public_url` as the product's `image` field."
     ),
     tags=["Uploads"],
-    request={"type": "object", "properties": {"filename": {"type": "string", "example": "photo.jpg"}}},
-    responses={
-        200: {
-            "type": "object",
-            "properties": {
-                "upload_url": {"type": "string"},
-                "object_name": {"type": "string"},
-                "public_url": {"type": "string"},
-            },
+    request=inline_serializer(
+        name="UploadRequest",
+        fields={
+            "filename": serializers.CharField(
+                help_text="Image filename"
+            )
         },
-        400: {"type": "object", "properties": {"error": {"type": "string"}}},
-    },
+        ),
+    examples=[
+        OpenApiExample(
+            "Example request",
+            value={"filename": "photo.jpg"},
+            request_only=True,
+        )
+    ],
+    responses={
+    200: inline_serializer(
+        name="UploadResponse",
+        fields={
+            "upload_url": serializers.URLField(),
+            "object_name": serializers.CharField(),
+            "public_url": serializers.URLField(),
+        },
+    ),
+    400: inline_serializer(
+        name="UploadError",
+        fields={
+            "error": serializers.CharField(),
+        },
+    ),
+}
 )
 @api_view(['POST'])
 def get_upload_url(request):
