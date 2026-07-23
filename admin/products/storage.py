@@ -3,7 +3,7 @@ from minio import Minio
 from datetime import timedelta
 
 minio_client = Minio(
-    os.environ.get("MINIO_ENDPOINT", "173.231.235.106:9000"),
+    os.environ.get("MINIO_INTERNAL_ENDPOINT", "173.231.235.106:9000"),
     access_key=os.environ.get("MINIO_ACCESS_KEY", "minioadmin"),
     secret_key=os.environ.get("MINIO_SECRET_KEY", "minioadmin123"),
     secure=False,
