@@ -93,7 +93,7 @@ export default function ProductList() {
                   </button>
                   <button
                     className="rounded bg-blue-500 px-2 py-2 text-white hover:bg-blue-600"
-                    onClick={() => navigate(`/admin/products/${product.id}`)}
+                    onClick={() => navigate(`/products/${product.id}`)}
                   >
                     Edit
                   </button>
