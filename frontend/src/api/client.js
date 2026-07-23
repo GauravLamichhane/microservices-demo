@@ -5,14 +5,14 @@ export const api = axios.create({ baseURL });
 
 const flaskBaseURL = import.meta.env.VITE_MAIN_API_URL || "/api/";
 const flaskApi = axios.create({ baseURL: flaskBaseURL });
-  
+
 export async function getAdminProducts() {
   const { data } = await api.get("/products/");
   return data;
 }
 
 export async function getMainProducts() {
-  const { data } = await flaskApi.get("/products/"); // Flask
+  const { data } = await flaskApi.get("/products"); // Flask
   return data;
 }
 
