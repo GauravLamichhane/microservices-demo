@@ -162,7 +162,7 @@ def get_upload_url(request):
     object_name = f"products/{uuid.uuid4()}.{extension}"
     upload_url = get_presigned_upload_url(object_name)
     public_url = get_public_url(object_name)
-
+    print("Request received here.")
     return Response({
         'upload_url': upload_url,
         'object_name': object_name,

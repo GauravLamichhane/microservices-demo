@@ -7,7 +7,7 @@ const flaskBaseURL = import.meta.env.VITE_MAIN_API_URL || "/api/main";
 const flaskApi = axios.create({ baseURL: flaskBaseURL });
 
 export async function getAdminProducts() {
-  const { data } = await api.get("/products/");
+  const { data } = await api.get("admin/products/");
   return data;
 }
 
@@ -22,22 +22,22 @@ export async function likeProduct(id) {
 }
 
 export async function createProduct(payload) {
-  const { data } = await api.post("/products/", payload);
+  const { data } = await api.post("admin/products/", payload);
   return data;
 }
 
 export async function updateProduct(id, payload) {
-  const { data } = await api.put(`/products/${id}/`, payload);
+  const { data } = await api.put(`admin/products/${id}/`, payload);
   return data;
 }
 
 export async function deleteProduct(id) {
-  const { data } = await api.delete(`/products/${id}/`);
+  const { data } = await api.delete(`admin/products/${id}/`);
   return data;
 }
 
 export async function getProduct(id) {
-  const { data } = await api.get(`/products/${id}/`);
+  const { data } = await api.get(`admin/products/${id}/`);
   return data;
 }
 
