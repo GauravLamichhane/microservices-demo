@@ -39,16 +39,6 @@ jobs:
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
-    env:
-      DB_NAME_ADMIN: ${{ secrets.DB_NAME_ADMIN }}
-      DB_USER_ADMIN: ${{ secrets.DB_USER_ADMIN }}
-      DB_PASSWORD_ADMIN: ${{ secrets.DB_PASSWORD_ADMIN }}
-      DB_NAME_MAIN: ${{ secrets.DB_NAME_MAIN }}
-      DB_USER_MAIN: ${{ secrets.DB_USER_MAIN }}
-      DB_PASSWORD_MAIN: ${{ secrets.DB_PASSWORD_MAIN }}
-      DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
-      MINIO_ACCESS_KEY: ${{ secrets.MINIO_ACCESS_KEY }}
-      MINIO_SECRET_KEY: ${{ secrets.MINIO_SECRET_KEY }}
     steps:
       - name: SSH and deploy
         uses: appleboy/ssh-action@v1.0.3
@@ -56,48 +46,11 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          envs: DB_NAME_ADMIN,DB_USER_ADMIN,DB_PASSWORD_ADMIN,DB_NAME_MAIN,DB_USER_MAIN,DB_PASSWORD_MAIN,DJANGO_SECRET_KEY,MINIO_ACCESS_KEY,MINIO_SECRET_KEY
           script: |
-            cat > ~/microservices-demo/admin/.env << EOF
-            DB_NAME=$DB_NAME_ADMIN
-            DB_USER=$DB_USER_ADMIN
-            DB_PASSWORD=$DB_PASSWORD_ADMIN
-            DB_HOST=db
-            KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-            DJANGO_SECRET_KEY=$DJANGO_SECRET_KEY
-            DJANGO_DEBUG=False
-            DJANGO_ALLOWED_HOSTS=173.231.235.106,admin-backend-1,micro.gaurav-lamichhane.com.np,localhost
-            CELERY_BROKER_URL=redis://redis:6379/0
-            MINIO_INTERNAL_ENDPOINT=minio:9000
-            MINIO_EXTERNAL_ENDPOINT=173.231.235.106:9000
-            MINIO_ACCESS_KEY=$MINIO_ACCESS_KEY
-            MINIO_SECRET_KEY=$MINIO_SECRET_KEY
-            MINIO_BUCKET=products-images
-            EOF
-
-            cat > ~/microservices-demo/main/.env << EOF
-            DB_NAME=$DB_NAME_MAIN
-            DB_USER=$DB_USER_MAIN
-            DB_PASSWORD=$DB_PASSWORD_MAIN
-            DB_HOST=db
-            DB_PORT=5432
-            KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-            ELASTICSEARCH_URL=http://elasticsearch:9200
-            ADMIN_API_URL=http://admin-backend-1:8000
-            EOF
-
-            cat > ~/microservices-demo/audit-logger/.env << EOF
-            KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-            MONGO_URL=mongodb://mongo:27017/
-            EOF
-
-            cat > ~/microservices-demo/search-indexer/.env << EOF
-            KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-            ELASTICSEARCH_URL=http://elasticsearch:9200
-            EOF
-
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             cd ~/microservices-demo
             git pull origin main
+
             cd kafka && docker compose up -d
             cd ../admin && docker compose pull && docker compose up -d
             cd ../main && docker compose pull && docker compose up -d
