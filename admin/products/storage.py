@@ -18,4 +18,4 @@ def get_presigned_upload_url(object_name):
 
 def get_public_url(object_name):
     endpoint = os.environ.get("MINIO_ENDPOINT", "173.231.235.106:9000")
-    return f"http://{endpoint}/{BUCKET_NAME}/{object_name}"
+    return f"https://minio.gaurav-lamichhane.com.np/{BUCKET_NAME}/{object_name}"
