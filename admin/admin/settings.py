@@ -157,23 +157,26 @@ REST_FRAMEWORK = {
 }
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Microservices Demo API',
-    'DESCRIPTION': (
-        'API documentation for a Kafka-driven microservices demo project. '
-        'Includes Django (product CRUD, image uploads via MinIO presigned URLs) '
-        'and integrates with a Flask service (likes, search, audit logs) via Kafka.'
+    "TITLE": "Microservices Demo API",
+    "DESCRIPTION": (
+        "API documentation for a Kafka-driven microservices demo project. "
+        "Includes Django (product CRUD, image uploads via MinIO presigned URLs) "
+        "and integrates with a Flask service (likes, search, audit logs) via Kafka."
     ),
-    'VERSION': '1.0.0',
-    'CONTACT': {'name': 'Gaurav Lamichhane'},
-    'SERVE_INCLUDE_SCHEMA': False,
-    'SWAGGER_UI_SETTINGS': {
-        'deepLinking': True,
-        'persistAuthorization': True,
-        'displayOperationId': True,
+    "VERSION": "1.0.0",
+    "CONTACT": {"name": "Gaurav Lamichhane"},
+    "SERVE_INCLUDE_SCHEMA": False,
+
+    "SWAGGER_UI_SETTINGS": {
+        "url": "/api/admin/schema/",
+        "deepLinking": True,
+        "persistAuthorization": True,
+        "displayOperationId": True,
     },
-    'TAGS': [
-        {'name': 'Products', 'description': 'CRUD operations on products'},
-        {'name': 'Uploads', 'description': 'Presigned MinIO upload URL generation'},
-        {'name': 'Users', 'description': 'Simple user lookup endpoint'},
+
+    "TAGS": [
+        {"name": "Products", "description": "CRUD operations on products"},
+        {"name": "Uploads", "description": "Presigned MinIO upload URL generation"},
+        {"name": "Users", "description": "Simple user lookup endpoint"},
     ],
 }
