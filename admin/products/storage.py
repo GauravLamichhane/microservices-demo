@@ -1,21 +1,40 @@
 import os
-from minio import Minio
 from datetime import timedelta
+from minio import Minio
 
-minio_client = Minio(
-    os.environ.get("MINIO_INTERNAL_ENDPOINT", "173.231.235.106:9000"),
-    access_key=os.environ.get("MINIO_ACCESS_KEY", "minioadmin"),
-    secret_key=os.environ.get("MINIO_SECRET_KEY", "minioadmin123"),
+INTERNAL_ENDPOINT = os.environ["MINIO_INTERNAL_ENDPOINT"]
+EXTERNAL_ENDPOINT = os.environ["MINIO_EXTERNAL_ENDPOINT"]
+
+ACCESS_KEY = os.environ["MINIO_ACCESS_KEY"]
+SECRET_KEY = os.environ["MINIO_SECRET_KEY"]
+
+BUCKET_NAME = os.environ["MINIO_BUCKET"]
+
+
+# Used by Django for internal operations
+internal_client = Minio(
+    INTERNAL_ENDPOINT,
+    access_key=ACCESS_KEY,
+    secret_key=SECRET_KEY,
     secure=False,
 )
 
-BUCKET_NAME = "products-images"
+# Used only to generate URLs for the browser
+external_client = Minio(
+    EXTERNAL_ENDPOINT,
+    access_key=ACCESS_KEY,
+    secret_key=SECRET_KEY,
+    secure=True,
+)
 
 
 def get_presigned_upload_url(object_name):
-    return minio_client.presigned_put_object(BUCKET_NAME, object_name, expires=timedelta(minutes=15))
+    return external_client.presigned_put_object(
+        BUCKET_NAME,
+        object_name,
+        expires=timedelta(minutes=15),
+    )
 
 
 def get_public_url(object_name):
-    endpoint = os.environ.get("MINIO_ENDPOINT", "173.231.235.106:9000")
-    return f"https://minio.gaurav-lamichhane.com.np/{BUCKET_NAME}/{object_name}"
+    return f"https://{EXTERNAL_ENDPOINT}/{BUCKET_NAME}/{object_name}"
