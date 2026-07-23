@@ -79,6 +79,22 @@ services:
     networks:
       - microservices-net
 
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin
+    depends_on:
+      - mongo
+    restart: unless-stopped
+    networks:
+      - microservices-net
+
 networks:
   microservices-net:
     external: true
