@@ -57,7 +57,7 @@ export default function ProductForm() {
         setImage("");
       }
       setError("");
-      navigate("/admin/products/");
+      navigate("/products/");
     } catch (err) {
       setError(
         isEditing ? "Failed to update product." : "Failed to create product.",
