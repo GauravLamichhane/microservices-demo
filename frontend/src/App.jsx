@@ -7,9 +7,9 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<MainProductList />} />
-      <Route path="/admin/products" element={<AdminProductList />} />
-      <Route path="/admin/create" element={<ProductForm />} />
-      <Route path="/admin/products/:id" element={<ProductForm />} />
+      <Route path="/products" element={<AdminProductList />} />
+      <Route path="/products/create" element={<ProductForm />} />
+      <Route path="/products/:id" element={<ProductForm />} />
     </Routes>
   );
 }

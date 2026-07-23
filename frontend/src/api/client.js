@@ -1,18 +1,18 @@
 import axios from "axios";
 
-const baseURL = import.meta.env.VITE_ADMIN_API_URL || "/api/admin";
+const baseURL = import.meta.env.VITE_ADMIN_API_URL || "/admin/api/";
 export const api = axios.create({ baseURL });
 
-const flaskBaseURL = import.meta.env.VITE_MAIN_API_URL || "/api/main";
+const flaskBaseURL = import.meta.env.VITE_MAIN_API_URL || "/api/";
 const flaskApi = axios.create({ baseURL: flaskBaseURL });
 
 export async function getAdminProducts() {
-  const { data } = await api.get("admin/products/");
+  const { data } = await api.get("/products/");
   return data;
 }
 
 export async function getMainProducts() {
-  const { data } = await flaskApi.get("/products"); // Flask
+  const { data } = await flaskApi.get("/products/"); // Flask
   return data;
 }
 
@@ -22,22 +22,22 @@ export async function likeProduct(id) {
 }
 
 export async function createProduct(payload) {
-  const { data } = await api.post("admin/products/", payload);
+  const { data } = await api.post("/products/", payload);
   return data;
 }
 
 export async function updateProduct(id, payload) {
-  const { data } = await api.put(`admin/products/${id}/`, payload);
+  const { data } = await api.put(`/products/${id}/`, payload);
   return data;
 }
 
 export async function deleteProduct(id) {
-  const { data } = await api.delete(`admin/products/${id}/`);
+  const { data } = await api.delete(`/products/${id}/`);
   return data;
 }
 
 export async function getProduct(id) {
-  const { data } = await api.get(`admin/products/${id}/`);
+  const { data } = await api.get(`/products/${id}/`);
   return data;
 }
 
