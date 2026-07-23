@@ -47,7 +47,7 @@ export default function ProductList() {
   return (
     <div className="p-6">
       <button
-        onClick={() => navigate("/admin/create/")}
+        onClick={() => navigate("/products/create/")}
         className="bg-green-400 cursor-pointer px-4 py-4 mb-2 hover:bg-green-600"
       >
         Add product
