@@ -9,7 +9,7 @@ import {
 import axios from "axios";
 
 export default function ProductForm() {
-  const { id } = useParams(); // present only on the edit route
+  const { id } = useParams();
   const isEditing = Boolean(id);
   const navigate = useNavigate();
 
@@ -22,7 +22,6 @@ export default function ProductForm() {
 
   useEffect(() => {
     if (!isEditing) return;
-
     getProduct(id)
       .then((product) => {
         setTitle(product.title);
@@ -34,18 +33,10 @@ export default function ProductForm() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-
     setError("");
 
-    if (!title.trim()) {
-      setError("Title is required.");
-      return;
-    }
-
-    if (!image.trim()) {
-      setError("Image URL is required.");
-      return;
-    }
+    if (!title.trim()) return setError("Title is required.");
+    if (!image.trim()) return setError("Please upload an image.");
 
     setSaving(true);
     try {
@@ -56,9 +47,8 @@ export default function ProductForm() {
         setTitle("");
         setImage("");
       }
-      setError("");
       navigate("/products/");
-    } catch (err) {
+    } catch {
       setError(
         isEditing ? "Failed to update product." : "Failed to create product.",
       );
@@ -79,7 +69,7 @@ export default function ProductForm() {
         headers: { "Content-Type": file.type },
       });
       setImage(public_url);
-    } catch (err) {
+    } catch {
       setError("Failed to upload image.");
     } finally {
       setUploading(false);
@@ -87,62 +77,87 @@ export default function ProductForm() {
   }
 
   if (loading) {
-    return <p className="mx-10 mt-10">Loading product…</p>;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <p className="text-sm text-gray-400">Loading product…</p>
+      </div>
+    );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mx-10 mt-10">
-      <h2>{isEditing ? "Edit Product" : "Add Product"}</h2>
+    <div className="min-h-screen bg-gray-50 px-4 py-10">
+      <div className="mx-auto max-w-lg rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+        <h2 className="mb-6 text-xl font-semibold text-gray-900">
+          {isEditing ? "Edit Product" : "Add Product"}
+        </h2>
 
-      {error && (
-        <p className="mb-4 rounded bg-red-100 p-2 text-red-600">{error}</p>
-      )}
-
-      <div className="mb-4">
-        <label className="mb-2 block">Title</label>
-        <input
-          type="text"
-          className="w-2xl rounded border p-2"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Enter product title"
-        />
-      </div>
-
-      <div className="mb-4">
-        <label className="mb-2 block">Product Image</label>
-        <input
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          onChange={handleFileChange}
-        />
-        {uploading && <p className="text-sm text-gray-500">Uploading…</p>}
-        {image && !uploading && (
-          <div className="mt-2">
-            <img
-              src={image}
-              alt="Preview"
-              className="h-24 w-24 rounded object-cover"
-            />
+        {error && (
+          <div className="mb-5 rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
           </div>
         )}
-      </div>
 
-      <button
-        type="submit"
-        disabled={saving || uploading}
-        className="rounded bg-blue-400 px-4 py-2 text-white disabled:opacity-50 cursor-pointer hover:bg-blue-600"
-      >
-        {uploading
-          ? "Uploading…"
-          : saving
-            ? isEditing
-              ? "Saving…"
-              : "Adding…"
-            : isEditing
-              ? "Save Changes"
-              : "Add Product"}
-      </button>
-    </form>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-gray-700">
+              Title
+            </label>
+            <input
+              type="text"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g. Wireless Mouse"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-gray-700">
+              Product Image
+            </label>
+
+            <div className="flex items-center gap-4">
+              {image && !uploading ? (
+                <img
+                  src={image}
+                  alt="Preview"
+                  className="h-16 w-16 flex-shrink-0 rounded-lg border border-gray-200 object-cover"
+                />
+              ) : (
+                <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-lg border border-dashed border-gray-300 text-xs text-gray-400">
+                  {uploading ? "…" : "No image"}
+                </div>
+              )}
+
+              <label className="flex-1 cursor-pointer rounded-lg border border-gray-300 px-3 py-2 text-center text-sm text-gray-600 transition hover:border-gray-400 hover:bg-gray-50">
+                {uploading ? "Uploading…" : "Choose file"}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+              </label>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={saving || uploading}
+            className="w-full rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {uploading
+              ? "Uploading…"
+              : saving
+                ? isEditing
+                  ? "Saving…"
+                  : "Adding…"
+                : isEditing
+                  ? "Save Changes"
+                  : "Add Product"}
+          </button>
+        </form>
+      </div>
+    </div>
   );
 }

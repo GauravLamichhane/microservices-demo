@@ -1,15 +1,26 @@
 import { useState, useEffect } from "react";
 import ProductCard from "./ProductCard";
 import { getMainProducts, likeProduct, searchProducts } from "../api/client";
+
 export default function ProductList() {
   const [products, setProducts] = useState([]);
   const [likeError, setLikeError] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
   const [searchError, setSearchError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   async function loadProducts() {
-    const data = await getMainProducts();
-    setProducts(data);
+    try {
+      setLoading(true);
+      const data = await getMainProducts();
+      setProducts(data);
+      setError("");
+    } catch {
+      setError("Failed to load products");
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -19,55 +30,82 @@ export default function ProductList() {
   async function handleSearch(e) {
     e.preventDefault();
 
-    if (!searchQuery.trim()) {
+    try {
       setSearchError("");
-      loadProducts();
-      return;
-    }
 
-    const results = await searchProducts(searchQuery);
+      if (!searchQuery.trim()) {
+        loadProducts();
+        return;
+      }
 
-    if (results.length === 0) {
-      setProducts([]);
-      setSearchError("No products found.");
-    } else {
+      const results = await searchProducts(searchQuery);
+
       setProducts(results);
-      setSearchError("");
+
+      if (results.length === 0) {
+        setSearchError("No products found.");
+      }
+    } catch {
+      setSearchError("Search failed");
     }
   }
 
   async function handleLike(id) {
     try {
       await likeProduct(id);
-      setLikeError((prev) => ({ ...prev, [id]: null }));
-      loadProducts();
+
+      setProducts((prev) =>
+        prev.map((product) =>
+          product.id === id
+            ? { ...product, likes: product.likes + 1 }
+            : product,
+        ),
+      );
+
+      setLikeError((prev) => ({
+        ...prev,
+        [id]: null,
+      }));
     } catch (error) {
-      if (error.response && error.response.status === 400) {
-        setLikeError((prev) => ({ ...prev, [id]: "Already liked!" }));
+      if (error.response?.status === 400) {
+        setLikeError((prev) => ({
+          ...prev,
+          [id]: "Already liked!",
+        }));
       } else {
-        setLikeError((prev) => ({ ...prev, [id]: "Something went wrong" }));
+        setLikeError((prev) => ({
+          ...prev,
+          [id]: "Something went wrong",
+        }));
       }
     }
   }
 
+  if (loading) {
+    return <p className="p-6">Loading products...</p>;
+  }
+
+  if (error) {
+    return <p className="p-6 text-red-500">{error}</p>;
+  }
+
   return (
     <div className="min-h-screen bg-neutral-50 p-6">
-      <form onSubmit={handleSearch} className="mb-4">
+      <form onSubmit={handleSearch} className="mb-6 flex gap-2">
         <input
-          type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search products..."
           className="rounded border p-2"
         />
-        <button
-          type="submit"
-          className="ml-2 rounded bg-blue-500 px-4 py-2 text-white"
-        >
+
+        <button className="rounded bg-blue-500 px-4 py-2 text-white">
           Search
         </button>
-        {searchError && <p className="text-red-500">{searchError}</p>}
       </form>
+
+      {searchError && <p className="mb-4 text-red-500">{searchError}</p>}
+
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {products.map((product) => (
           <ProductCard
