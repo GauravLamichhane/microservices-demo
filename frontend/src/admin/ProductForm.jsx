@@ -13,8 +13,12 @@ export default function ProductForm() {
   const isEditing = Boolean(id);
   const navigate = useNavigate();
 
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [preview, setPreview] = useState("");
+
   const [title, setTitle] = useState("");
   const [image, setImage] = useState("");
+
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(isEditing);
@@ -22,6 +26,7 @@ export default function ProductForm() {
 
   useEffect(() => {
     if (!isEditing) return;
+
     getProduct(id)
       .then((product) => {
         setTitle(product.title);
@@ -31,22 +36,88 @@ export default function ProductForm() {
       .finally(() => setLoading(false));
   }, [id, isEditing]);
 
+  useEffect(() => {
+    return () => {
+      if (preview) {
+        URL.revokeObjectURL(preview);
+      }
+    };
+  }, [preview]);
+
+  function handleFileChange(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (preview) {
+      URL.revokeObjectURL(preview);
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+
+    setSelectedFile(file);
+    setPreview(objectUrl);
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
+
     setError("");
 
-    if (!title.trim()) return setError("Title is required.");
-    if (!image.trim()) return setError("Please upload an image.");
+    if (!title.trim()) {
+      return setError("Title is required.");
+    }
+
+    if (!isEditing && !selectedFile) {
+      return setError("Please choose an image.");
+    }
 
     setSaving(true);
+
     try {
+      let imageUrl = image;
+
+      if (selectedFile) {
+        setUploading(true);
+
+        try {
+          const { upload_url, public_url } = await getUploadUrl(
+            selectedFile.name,
+          );
+
+          await axios.put(upload_url, selectedFile, {
+            headers: {
+              "Content-Type": selectedFile.type,
+            },
+          });
+
+          imageUrl = public_url;
+        } finally {
+          setUploading(false);
+        }
+      }
+
       if (isEditing) {
-        await updateProduct(id, { title, image });
+        await updateProduct(id, {
+          title,
+          image: imageUrl,
+        });
       } else {
-        await createProduct({ title, image });
+        await createProduct({
+          title,
+          image: imageUrl,
+        });
+
         setTitle("");
         setImage("");
+        setSelectedFile(null);
+
+        if (preview) {
+          URL.revokeObjectURL(preview);
+        }
+
+        setPreview("");
       }
+
       navigate("/products/");
     } catch {
       setError(
@@ -54,24 +125,6 @@ export default function ProductForm() {
       );
     } finally {
       setSaving(false);
-    }
-  }
-
-  async function handleFileChange(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    setUploading(true);
-    setError("");
-    try {
-      const { upload_url, public_url } = await getUploadUrl(file.name);
-      await axios.put(upload_url, file, {
-        headers: { "Content-Type": file.type },
-      });
-      setImage(public_url);
-    } catch {
-      setError("Failed to upload image.");
-    } finally {
       setUploading(false);
     }
   }
@@ -102,12 +155,13 @@ export default function ProductForm() {
             <label className="mb-1.5 block text-sm font-medium text-gray-700">
               Title
             </label>
+
             <input
               type="text"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Wireless Mouse"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
             />
           </div>
 
@@ -117,20 +171,21 @@ export default function ProductForm() {
             </label>
 
             <div className="flex items-center gap-4">
-              {image && !uploading ? (
+              {preview || image ? (
                 <img
-                  src={image}
+                  src={preview || image}
                   alt="Preview"
                   className="h-16 w-16 flex-shrink-0 rounded-lg border border-gray-200 object-cover"
                 />
               ) : (
                 <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-lg border border-dashed border-gray-300 text-xs text-gray-400">
-                  {uploading ? "…" : "No image"}
+                  No image
                 </div>
               )}
 
               <label className="flex-1 cursor-pointer rounded-lg border border-gray-300 px-3 py-2 text-center text-sm text-gray-600 transition hover:border-gray-400 hover:bg-gray-50">
-                {uploading ? "Uploading…" : "Choose file"}
+                {uploading ? "Uploading..." : "Choose file"}
+
                 <input
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
@@ -147,11 +202,11 @@ export default function ProductForm() {
             className="w-full rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {uploading
-              ? "Uploading…"
+              ? "Uploading..."
               : saving
                 ? isEditing
-                  ? "Saving…"
-                  : "Adding…"
+                  ? "Saving..."
+                  : "Adding..."
                 : isEditing
                   ? "Save Changes"
                   : "Add Product"}
