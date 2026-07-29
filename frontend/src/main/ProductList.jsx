@@ -27,28 +27,30 @@ export default function ProductList() {
     loadProducts();
   }, []);
 
-  async function handleSearch(e) {
-    e.preventDefault();
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      try {
+        setSearchError("");
 
-    try {
-      setSearchError("");
+        if (!searchQuery.trim()) {
+          await loadProducts();
+          return;
+        }
 
-      if (!searchQuery.trim()) {
-        loadProducts();
-        return;
+        const results = await searchProducts(searchQuery);
+
+        setProducts(results);
+
+        if (results.length === 0) {
+          setSearchError("No products found.");
+        }
+      } catch {
+        setSearchError("Search failed.");
       }
+    }, 300);
 
-      const results = await searchProducts(searchQuery);
-
-      setProducts(results);
-
-      if (results.length === 0) {
-        setSearchError("No products found.");
-      }
-    } catch {
-      setSearchError("Search failed");
-    }
-  }
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   async function handleLike(id) {
     try {
@@ -91,18 +93,14 @@ export default function ProductList() {
 
   return (
     <div className="min-h-screen bg-neutral-50 p-6">
-      <form onSubmit={handleSearch} className="mb-6 flex gap-2">
+      <div className="mb-6">
         <input
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search products..."
-          className="rounded border p-2"
+          className="w-full max-w-md rounded border p-2"
         />
-
-        <button className="rounded bg-blue-500 px-4 py-2 text-white">
-          Search
-        </button>
-      </form>
+      </div>
 
       {searchError && <p className="mb-4 text-red-500">{searchError}</p>}
 
