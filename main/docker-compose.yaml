@@ -52,6 +52,32 @@ services:
     networks:
       - default
 
+  celery-worker:
+    image: ghcr.io/gauravlamichhane/microservices-demo/main:latest
+    command: celery -A celery_app.celery worker --loglevel=info --concurrency=1
+    mem_limit: 150m
+    env_file:
+      - .env
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - microservices-net
+      - default
+
+  celery-beat:
+    image: ghcr.io/gauravlamichhane/microservices-demo/main:latest
+    command: celery -A celery_app.celery beat --loglevel=info
+    mem_limit: 100m
+    env_file:
+      - .env
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - microservices-net
+      - default
+
 volumes:
   flask_postgres_data:
 

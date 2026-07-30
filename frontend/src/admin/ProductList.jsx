@@ -24,6 +24,7 @@ export default function ProductList() {
     loadProducts();
 
     const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+    //open a websocket connection
     const socket = new WebSocket(
       `${protocol}://${window.location.host}/ws/likes/`,
     );

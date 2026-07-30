@@ -39,8 +39,10 @@ for message in consumer:
         product.likes += 1
         product.save(update_fields=["likes"])
 
-        channel_layer = get_channel_layer()
+        channel_layer = get_channel_layer() #returns redis channel layer
 
+
+        #sends the message to redis channel layer
         async_to_sync(channel_layer.group_send)(
             "likes",
             {

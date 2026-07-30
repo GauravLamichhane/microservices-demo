@@ -33,6 +33,15 @@ app.config["SQLALCHEMY_DATABASE_URI"] = (
 )
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["CELERY_BROKER_URL"] = os.getenv(
+    "CELERY_BROKER_URL",
+    "redis://redis:6379/0",
+)
+
+app.config["CELERY_RESULT_BACKEND"] = os.getenv(
+    "CELERY_RESULT_BACKEND",
+    "redis://redis:6379/0",
+)
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -127,7 +136,16 @@ def like(id):
 
     try:
         productUser = ProductUser(user_id = data['id'], product_id = id)
+
+        event = PublishedEvent(
+            channel = "product-likes",
+            payload = id,
+            extra = {
+                "type": "product-liked",
+            },
+        )
         db.session.add(productUser)
+        db.session.add(event)
         db.session.commit()
         print("Before published")
         publish('product_liked', id)
