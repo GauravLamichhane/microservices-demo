@@ -38,3 +38,13 @@ def get_presigned_upload_url(object_name):
 
 def get_public_url(object_name):
     return f"https://{EXTERNAL_ENDPOINT}/{BUCKET_NAME}/{object_name}"
+
+def delete_object(image_url):
+    prefix = f"https://{EXTERNAL_ENDPOINT}/{BUCKET_NAME}/"
+    if not image_url or not image_url.startswith(prefix):
+        return  # not a MinIO url, skip (e.g. old picsum links)
+    object_name = image_url[len(prefix):]
+    try:
+        internal_client.remove_object(BUCKET_NAME, object_name)
+    except Exception as e:
+        print(f"Failed to delete MinIO object {object_name}: {e}")

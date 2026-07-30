@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from .models import Product, PublishedEvent
-
+from .storage import delete_object
 
 @receiver(post_save, sender=Product)
 def product_saved(sender, instance, created, update_fields=None, **kwargs):
@@ -23,6 +23,7 @@ def product_saved(sender, instance, created, update_fields=None, **kwargs):
 
 @receiver(post_delete, sender=Product)
 def product_deleted(sender, instance, **kwargs):
+    delete_object(instance.image)
     PublishedEvent.objects.create(
         channel='product-events',
         payload=instance.pk,
