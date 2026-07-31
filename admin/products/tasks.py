@@ -28,9 +28,12 @@ def publish_events_to_kafka():
         try:
             value_bytes = json.dumps(event.payload).encode("utf-8")
             event_type = event.extra.get("type", "")
+            correlation_id = event.extra.get("correlation_id", "")
             headers = [("type", event_type.encode("utf-8"))]
+            if correlation_id:
+                headers.append(("correlation_id", correlation_id.encode("utf-8")))
 
-            print("Publishing event", event.id)
+            print(f"Publishing event {event.id} correlation_id={correlation_id}")
 
             future = producer.send(
                 event.channel,

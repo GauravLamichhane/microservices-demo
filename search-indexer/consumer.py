@@ -28,6 +28,7 @@ print("Search indexer started consuming")
 for message in consumer:
     headers = dict(message.headers or [])
     event_type = headers.get("type", b"").decode("utf-8")
+    correlation_id = headers.get("correlation_id", b"").decode("utf-8")
     data = message.value
 
     if event_type in ("product_created", "product_updated"):
@@ -36,13 +37,13 @@ for message in consumer:
             "image": data["image"],
             "likes": data.get("likes", 0),
         })
-        print(f"Indexed product {data['id']}")
+        print(f"[search-indexer] correlation_id={correlation_id} Indexed product {data['id']}")
 
     elif event_type == "product_deleted":
         try:
             es.delete(index=INDEX_NAME, id=data)
-            print(f"Removed product {data} from index")
+            print(f"[search-indexer] correlation_id={correlation_id} Removed product {data} from index")
         except Exception as e:
-            print(f"Product {data} not in index, skipping delete: {e}")
+            print(f"[search-indexer] correlation_id={correlation_id} Product {data} not in index, skipping delete: {e}")
 
     consumer.commit()

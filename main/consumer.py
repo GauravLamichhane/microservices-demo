@@ -28,22 +28,23 @@ print("Started consuming")
 for message in consumer:
     headers = dict(message.headers or [])
     event_type = headers.get("type", b"").decode("utf-8")
+    correlation_id = headers.get("correlation_id", b"").decode("utf-8")
     data = message.value
     if event_type == "product_deleted":
-        print(f"Received {event_type} for product {data}")
+            print(f"[db-writer] correlation_id={correlation_id} Received {event_type} for product {data}")
     else:
-        print(f"Received {event_type} for product {data.get('id')}")
+            print(f"[db-writer] correlation_id={correlation_id} Received {event_type} for product {data.get('id')}")
     print(
-    f"Topic={message.topic}, "
-    f"Partition={message.partition}, "
-    f"Offset={message.offset}"
-    )
+        f"Topic={message.topic}, "
+        f"Partition={message.partition}, "
+        f"Offset={message.offset}"
+        )
 
     with app.app_context():
         if event_type == "product_created":
             existing = Product.query.get(data["id"])
             if existing:
-                print(f"Product {data['id']} already exists, skipping create")
+                print(f"[db-writer] correlation_id={correlation_id} Product {data['id']} already exists, skipping create")
             else:
                 product = Product(id=data["id"], title=data["title"], image=data["image"])
                 db.session.add(product)
@@ -52,7 +53,7 @@ for message in consumer:
                     cache.delete("products")
                 except redis.exceptions.RedisError:
                     pass
-                print("Product Created")
+                print(f"[db-writer] correlation_id={correlation_id} Product Created")
 
         elif event_type == "product_updated":
             product = Product.query.get(data["id"])
@@ -64,9 +65,9 @@ for message in consumer:
                     cache.delete("products")
                 except redis.exceptions.RedisError:
                     pass
-                print("Product Updated")
+                print(f"[db-writer] correlation_id={correlation_id} Product Updated")
             else:
-                print(f"Product {data['id']} not found in Flask DB, skipping update")
+                print(f"[db-writer] correlation_id={correlation_id} Product {data['id']} not found in Flask DB, skipping update")
 
         elif event_type == "product_deleted":
             product = Product.query.get(data)
@@ -77,10 +78,10 @@ for message in consumer:
                     cache.delete("products")
                 except redis.exceptions.RedisError:
                     pass
-                print("Product deleted")
+                print(f"[db-writer] correlation_id={correlation_id} Product deleted")
             else:
-                print(f"Product {data} not found in Flask DB, skipping delete")
+                print(f"[db-writer] correlation_id={correlation_id} Product {data} not found in Flask DB, skipping delete")
         else:
-            print(f"Unknown event: {event_type}")
+            print(f"[db-writer] correlation_id={correlation_id} Unknown event: {event_type}")
 
     consumer.commit()

@@ -30,16 +30,19 @@ print("Audit logger started consuming")
 for message in consumer:
   headers = dict(message.headers or [])
   event_type = headers.get("type", b"").decode("utf-8")
+  correlation_id = headers.get("correlation_id", b"").decode("utf-8")
 
   log_entry = {
     "event_type": event_type,
     "topic": message.topic,
     "payload": message.value,
+    "correlation_id": correlation_id,
     "timestamp": datetime.now(timezone.utc),
   }
 
   collection.insert_one(log_entry)
   print(
+    f"[audit-logger] correlation_id={correlation_id} "
     f"[{message.topic}] "
     f"{event_type} "
     f"offset={message.offset} "
