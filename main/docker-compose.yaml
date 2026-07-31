@@ -54,7 +54,7 @@ services:
 
   celery-worker:
     image: ghcr.io/gauravlamichhane/microservices-demo/main:latest
-    command: celery -A celery_app.celery worker --loglevel=info --concurrency=1
+    command: celery -A celery_app.celery worker --loglevel=info --pool=solo
     mem_limit: 150m
     env_file:
       - .env
