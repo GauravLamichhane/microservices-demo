@@ -148,7 +148,7 @@ def like(id):
         db.session.add(event)
         db.session.commit()
         print("Before published")
-        publish('product_liked', id)
+        # publish('product_liked', id)
         print(f"Publishing like for product {id}")
         cache.delete("products") # invalidate cache since like changed
     except Exception as e:
