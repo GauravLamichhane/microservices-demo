@@ -168,7 +168,7 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
 
     "SWAGGER_UI_SETTINGS": {
-        "url": "/api/admin/schema/",
+        "url": "/admin/schema/",
         "deepLinking": True,
         "persistAuthorization": True,
         "displayOperationId": True,
