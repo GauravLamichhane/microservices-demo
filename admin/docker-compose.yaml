@@ -17,7 +17,7 @@ services:
   queue:
     image: ghcr.io/gauravlamichhane/microservices-demo/admin:latest
     command: "python consumer.py"
-    mem_limit: 60m
+    mem_limit: 120m
     env_file:
       - .env
     depends_on:
