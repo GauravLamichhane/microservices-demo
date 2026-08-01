@@ -23,10 +23,12 @@ if producer is None:
 def publish(method, body):
     if producer is None:
         print(f"Kafka producer not initialized, dropping event: {method}")
-        return
-    producer.send(
-        "product-likes",  # or "product-likes" depending on which producer.py this is
+        raise RuntimeError("Kafka producer not initialized")
+    future = producer.send(
+        "product-likes",
         value=body,
         headers=[("type", method.encode("utf-8"))]
     )
+    record_metadata = future.get(timeout=10)
+    print(f"Published to {record_metadata.topic}, partition {record_metadata.partition}, offset {record_metadata.offset}")
     producer.flush()
