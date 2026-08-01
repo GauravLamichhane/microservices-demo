@@ -10,6 +10,8 @@ for attempt in range(10):
         producer = KafkaProducer(
             bootstrap_servers=os.environ.get("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092"),
             value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+            acks="all",
+            enable_idempotence=True,
         )
         break
     except NoBrokersAvailable:

@@ -35,6 +35,8 @@ def get_kafka_producer():
                 retry_backoff_ms=1000,
                 reconnect_backoff_ms=1000,
                 reconnect_backoff_max_ms=5000,
+                acks="all",
+                enable_idempotence=True,
             )
             return _producer
 
