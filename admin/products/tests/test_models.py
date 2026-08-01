@@ -74,7 +74,7 @@ def test_likes_only_update_does_not_publish_event():
 
 def test_create_product_via_api():
     client = APIClient()
-    response = client.post('/api/products/', {
+    response = client.post('/admin/api/products/', {
         'title': "Laptop",
         "image": "https://abc.com/img.jpg"
     })

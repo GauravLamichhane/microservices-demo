@@ -17,7 +17,7 @@ def test_get_upload_url(mock_public_url, mock_upload_url, client):
     mock_public_url.return_value = "https://public-url"
 
     response = client.post(
-        "/api/products/upload-url/",
+        "/admin/api/products/upload-url/",
         {"filename": "image.jpg"},
         format="json"
     )
