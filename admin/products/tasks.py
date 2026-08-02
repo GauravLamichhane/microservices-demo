@@ -1,5 +1,6 @@
 import json
 import requests
+from django.db import transaction
 from celery import shared_task
 from .models import Product, PublishedEvent
 # from .producer import publish
@@ -15,7 +16,11 @@ def publish_events_to_kafka():
     if producer is None:
         return "Kafka producer unavailable, skipping this run"
 
-    events = PublishedEvent.objects.filter(is_consumed=False)[:50]
+    with transaction.atomic():
+        events = list(
+            PublishedEvent.objects.select_for_update(skip_locked=True)
+            .filter(is_consumed=False)[:50]
+        )
 
     print("Pending events:", events.count())
 
