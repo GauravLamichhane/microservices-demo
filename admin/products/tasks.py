@@ -22,45 +22,43 @@ def publish_events_to_kafka():
             .filter(is_consumed=False)[:50]
         )
 
-    print("Pending events:", len(events))
+        print("Pending events:", len(events))
 
+        if not events:
+            return "No new events found"
 
-    if not events.exists():
-        return "No new events found"
+        success_count = 0
+        for event in events:
+            try:
+                value_bytes = json.dumps(event.payload).encode("utf-8")
+                event_type = event.extra.get("type", "")
+                correlation_id = event.extra.get("correlation_id", "")
+                headers = [("type", event_type.encode("utf-8"))]
+                if correlation_id:
+                    headers.append(("correlation_id", correlation_id.encode("utf-8")))
 
-    success_count = 0
-    for event in events:
-        try:
-            value_bytes = json.dumps(event.payload).encode("utf-8")
-            event_type = event.extra.get("type", "")
-            correlation_id = event.extra.get("correlation_id", "")
-            headers = [("type", event_type.encode("utf-8"))]
-            if correlation_id:
-                headers.append(("correlation_id", correlation_id.encode("utf-8")))
+                print(f"Publishing event {event.id} correlation_id={correlation_id}")
 
-            print(f"Publishing event {event.id} correlation_id={correlation_id}")
+                future = producer.send(
+                    event.channel,
+                    value=value_bytes,
+                    headers=headers,
+                )
+                future.get(timeout=5)
 
-            future = producer.send(
-                event.channel,
-                value=value_bytes,
-                headers=headers,
-            )
-            # Block briefly to confirm delivery before marking as consumed i.e ack
-            future.get(timeout=5)
+                print("Kafka ACK received")
 
-            print("Kafka ACK received")
+                event.is_consumed = True
+                event.save(update_fields=["is_consumed"])
+                success_count += 1
+                print("Marked consumed")
 
-            event.is_consumed = True
-            event.save(update_fields=["is_consumed"])
-            success_count += 1
-            print("Marked consumed")
+            except Exception as e:
+                print(f"Failed to publish event {event.id}, will retry next run: {e}")
+                continue
 
-        except Exception as e:
-            print(f"Failed to publish event {event.id}, will retry next run: {e}")
-            continue
-
-    producer.flush()
-    return f"Published {success_count} events"
+        producer.flush()
+        return f"Published {success_count} events"
 
 @shared_task
 def reconcile_products():
