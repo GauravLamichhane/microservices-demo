@@ -22,7 +22,7 @@ def publish_events_to_kafka():
             .filter(is_consumed=False)[:50]
         )
 
-    print("Pending events:", events.count())
+    print("Pending events:", len(events))
 
 
     if not events.exists():
